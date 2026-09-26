@@ -205,8 +205,7 @@
           <div class="eyebrow">254383 ALGORITHM DESIGN AND ANALYSIS · สัปดาห์ 11–15</div>
           <h1>Watch algorithms<br>work, <span class="s1">step</span> <span class="s2">by</span> <span class="s3">step.</span></h1>
           <p class="lead">กดเล่น กดย้อน เปลี่ยนตัวเลขเอง แล้วดูว่าตารางกับกราฟเปลี่ยนยังไง ทุกบทใช้ตัวอย่างเดียวกับสไลด์ในห้อง</p>
-          <div class="herostrip c-st"><div class="scroll"><div id="heroStrip"></div></div>
-            <div class="hs-cap"><span id="heroCap">Horspool กำลังหาคำว่า GREEDY</span><a href="#horspool">เปิดบท Horspool →</a></div></div>
+          <div class="herostrip c-st"><div class="scroll"><div id="heroStrip"></div></div></div>
         </section>
         ${chapters}
         <footer class="foot">ตัวอย่างอ้างอิงสไลด์ week7rev01, week8rev02, week9rev02 และ Levitin บทที่ 7–9 · ความคืบหน้าเก็บไว้ในเบราว์เซอร์นี้เท่านั้น</footer>
@@ -222,7 +221,7 @@
     const frames = Lab.horspool.frames(text, pat).filter((f) => f.kind !== 'cmp' || f.last);
     let i = 0;
     // Keeps stepping even with Reduce Motion on: the CSS drops the sliding transition, so each step jumps instead.
-    const draw = () => { Lab.horspool.drawStrip(host, text, pat, frames[i]); const c = document.getElementById('heroCap'); if (c) c.innerHTML = frames[i].plain || 'Horspool กำลังหาคำว่า GREEDY'; };
+    const draw = () => Lab.horspool.drawStrip(host, text, pat, frames[i]);
     draw();
     const t = setInterval(() => {
       if (!document.body.contains(host)) { clearInterval(t); return; }
