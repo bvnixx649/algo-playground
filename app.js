@@ -1,0 +1,370 @@
+/* Algo Playground — shell, router, shared widgets */
+(function () {
+  const Lab = (window.Lab = {});
+  const lessons = [];
+  Lab.register = (def) => lessons.push(def);
+
+  /* ---------- storage (per-viewer progress, optional) ---------- */
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('algo-pg:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('algo-pg:' + k, JSON.stringify(v)); } catch (e) { /* ignore */ } },
+  };
+  Lab.store = store;
+
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  Lab.esc = esc;
+  Lab.k = (s, cls = '') => `<span class="k ${cls}">${esc(s)}</span>`;
+
+  const ICON = {
+    reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
+    prev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+    next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4.2" height="15" rx="1"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1"/></svg>',
+  };
+
+  /* ---------- chapters & catalogue ---------- */
+  const CH = {
+    st: { n: '01', name: 'Space–Time Trade-offs', th: 'ยอมใช้หน่วยความจำเพิ่ม เพื่อให้ทำงานเร็วขึ้น' },
+    dp: { n: '02', name: 'Dynamic Programming', th: 'แก้ปัญหาย่อยครั้งเดียว จดลงตาราง แล้วใช้ซ้ำ' },
+    gr: { n: '03', name: 'Greedy Technique', th: 'ทุกขั้นหยิบตัวที่ดีที่สุดตอนนี้ แล้วไม่ย้อนกลับ' },
+  };
+  const CATALOG = {
+    st: [['counting', 'Counting Sort', 'นับว่ามีกี่ตัวที่น้อยกว่า ได้ตำแหน่งทันที', 'bars'],
+         ['horspool', 'Horspool', 'ดูตัวอักษรตัวเดียว แล้วรู้ว่ากระโดดได้กี่ช่อง', 'strip'],
+         ['boyer', 'Boyer-Moore', 'สองตาราง shift เลือกค่าที่กระโดดไกลกว่า', 'strip2'],
+         ['hashing', 'Hashing', 'คำนวณเลขช่องจาก key แล้วไปที่ช่องนั้นเลย', 'hash'],
+         ['btree', 'B-Tree', 'ต้นไม้เตี้ย หนึ่ง node เก็บได้หลาย key', 'btree']],
+    dp: [['coinrow', 'Coin-row', 'หยิบเหรียญที่ไม่ติดกันให้ได้มูลค่ามากสุด', 'row'],
+         ['change', 'Change-making', 'ทอนเงินด้วยจำนวนเหรียญน้อยที่สุด', 'row'],
+         ['collect', 'Coin-collecting', 'หุ่นยนต์เดินขวาหรือลง เก็บเหรียญให้มากสุด', 'grid'],
+         ['knapsack', '0/1 Knapsack', 'ถามทีละชิ้นว่าใส่หรือไม่ใส่ แล้วจดคำตอบ', 'grid'],
+         ['obst', 'Optimal BST', 'จัด BST ให้ค้นหาเฉลี่ยน้อยครั้งที่สุด', 'btree'],
+         ['floyd', 'Warshall & Floyd', 'เพิ่มจุดแวะทีละจุด ได้คำตอบทุกคู่', 'matrix']],
+    gr: [['prim', 'Prim', 'งอกต้นไม้ทีละกิ่งที่สั้นที่สุด', 'graph'],
+         ['kruskal', 'Kruskal', 'เรียง edge แล้วหยิบ ถ้าไม่ทำให้เกิดวงจร', 'graph'],
+         ['dijkstra', 'Dijkstra', 'ปิดจุดที่ใกล้ที่สุดทีละจุด ได้ระยะสั้นสุด', 'graph'],
+         ['huffman', 'Huffman', 'รวมสองตัวที่น้อยสุด ตัวที่ใช้บ่อยได้รหัสสั้น', 'tree'],
+         ['greedylab', 'โจทย์ Greedy จาก lab', '12 แบบ จำเกณฑ์การเรียงให้ได้', 'bars']],
+  };
+  Lab.CH = CH;
+
+  function glyph(kind) {
+    const S = (inner, w = 120) => `<svg viewBox="0 0 ${w} 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+    switch (kind) {
+      case 'strip': return S([0, 1, 2, 3, 4, 5, 6].map((i) => `<rect x="${4 + i * 16}" y="8" width="13" height="13" rx="3" opacity=".35"/>`).join('') +
+        [3, 4, 5].map((i) => `<rect x="${4 + i * 16}" y="30" width="13" height="13" rx="3" fill="currentColor" fill-opacity=".18"/>`).join('') + `<path d="M36 52h40" /><path d="M70 47l6 5-6 5"/>`);
+      case 'strip2': return S([0, 1, 2, 3, 4, 5, 6].map((i) => `<rect x="${4 + i * 16}" y="8" width="13" height="13" rx="3" opacity=".35"/>`).join('') +
+        [2, 3, 4, 5].map((i) => `<rect x="${4 + i * 16}" y="30" width="13" height="13" rx="3"${i > 3 ? ' fill="currentColor" fill-opacity=".3"' : ''}/>`).join(''));
+      case 'grid': return S([0, 1, 2].map((r) => [0, 1, 2, 3, 4].map((c) => `<rect x="${6 + c * 20}" y="${4 + r * 20}" width="16" height="16" rx="3" ${r === 2 && c === 4 ? 'fill="currentColor"' : r === 1 && (c === 4 || c === 2) ? 'fill="currentColor" fill-opacity=".25"' : 'opacity=".4"'}/>`).join('')).join(''));
+      case 'graph': return S(`<path d="M16 48L44 14L84 16L106 46L60 50Z" opacity=".35"/><path d="M16 48L44 14L60 50L106 46" stroke-width="3.4"/>` +
+        [[16, 48], [44, 14], [84, 16], [106, 46], [60, 50]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="6.5" fill="${i === 2 ? 'var(--surface)' : 'currentColor'}"/>`).join(''));
+      case 'tree': return S(`<path d="M60 10L34 32M60 10L86 32M34 32L20 54M34 32L48 54"/>` + [[60, 10], [34, 32], [86, 32], [20, 54], [48, 54]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6" fill="currentColor"/>`).join(''));
+      case 'btree': return S(`<rect x="40" y="4" width="40" height="16" rx="3"/><path d="M60 4v16"/><rect x="6" y="40" width="30" height="16" rx="3" opacity=".5"/><rect x="45" y="40" width="30" height="16" rx="3" opacity=".5"/><rect x="84" y="40" width="30" height="16" rx="3" fill="currentColor" fill-opacity=".25"/><path d="M42 20L21 40M60 20v20M78 20l21 20"/>`);
+      case 'bars': return S([28, 44, 14, 52, 36, 22].map((h, i) => `<rect x="${8 + i * 18}" y="${58 - h}" width="12" height="${h}" rx="3" ${i === 3 ? 'fill="currentColor"' : 'opacity=".45"'}/>`).join(''));
+      case 'hash': return S(`<path d="M6 32h26"/><path d="M26 26l6 6-6 6"/>` + [0, 1, 2, 3, 4].map((i) => `<rect x="48" y="${2 + i * 12}" width="64" height="10" rx="2.5" ${i === 2 ? 'fill="currentColor" fill-opacity=".3"' : 'opacity=".4"'}/>`).join(''));
+      case 'row': return S([0, 1, 2, 3, 4, 5].map((i) => `<circle cx="${12 + i * 19}" cy="32" r="8" ${i % 2 === 0 ? 'fill="currentColor" fill-opacity=".3"' : 'opacity=".4"'}/>`).join(''));
+      case 'matrix': return S([0, 1, 2].map((r) => [0, 1, 2, 3].map((c) => `<rect x="${24 + c * 18}" y="${6 + r * 18}" width="14" height="14" rx="3" ${c === 1 || r === 1 ? 'fill="currentColor" fill-opacity=".25"' : 'opacity=".4"'}/>`).join('')).join(''));
+      default: return S('');
+    }
+  }
+
+  /* ---------- progress ---------- */
+  const progress = {
+    get(id) { return store.get('done:' + id, []); },
+    mark(id, key) { const a = this.get(id); if (!a.includes(key)) { a.push(key); store.set('done:' + id, a); } updateCount(); },
+  };
+  Lab.progress = progress;
+  let current = null;
+  function updateCount() {
+    const el = document.querySelector('.top .count');
+    if (!el || !current) return;
+    el.textContent = `ตอบถูก ${progress.get(current.id).length}/${current.checks} ข้อ`;
+  }
+
+  /* ---------- shared widgets ---------- */
+  // Stepper: frames[] + render(frame, i) -> caption html
+  Lab.stepper = function (host, opts) {
+    const stage = document.createElement('div');
+    const cap = document.createElement('div');
+    cap.className = 'cap';
+    cap.setAttribute('aria-live', 'polite');
+    const bar = document.createElement('div');
+    bar.className = 'stepper';
+    bar.innerHTML = `<button class="sbtn" data-a="reset" aria-label="เริ่มใหม่">${ICON.reset}</button>
+      <button class="sbtn" data-a="prev" aria-label="ย้อนหนึ่งขั้น">${ICON.prev}</button>
+      <button class="sbtn play" data-a="play" aria-label="เล่นอัตโนมัติ">${ICON.play}</button>
+      <button class="sbtn" data-a="next" aria-label="ขั้นถัดไป">${ICON.next}</button>
+      <input class="scrub" type="range" min="0" value="0" aria-label="เลื่อนดูทีละขั้น">
+      <span class="scount"></span>`;
+    host.append(stage, cap, bar);
+    host.tabIndex = 0;
+    const scrub = bar.querySelector('.scrub');
+    const count = bar.querySelector('.scount');
+    const playBtn = bar.querySelector('[data-a="play"]');
+    let frames = opts.frames, i = 0, timer = null;
+    const speed = opts.speed || 1000;
+
+    function draw() {
+      const html = opts.render(stage, frames[i], i, frames);
+      cap.innerHTML = html || '';
+      scrub.max = frames.length - 1;
+      scrub.value = i;
+      count.textContent = `${i + 1}/${frames.length}`;
+      if (opts.onStep) opts.onStep(i, frames);
+    }
+    function go(n) { i = Math.max(0, Math.min(frames.length - 1, n)); draw(); }
+    function stop() { clearInterval(timer); timer = null; playBtn.innerHTML = ICON.play; playBtn.setAttribute('aria-label', 'เล่นอัตโนมัติ'); }
+    function play() {
+      if (i >= frames.length - 1) go(0);
+      playBtn.innerHTML = ICON.pause; playBtn.setAttribute('aria-label', 'หยุด');
+      timer = setInterval(() => { if (i >= frames.length - 1) stop(); else go(i + 1); }, speed);
+    }
+    bar.addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b) return;
+      const a = b.dataset.a;
+      if (a === 'play') { timer ? stop() : play(); return; }
+      stop();
+      if (a === 'next') go(i + 1); else if (a === 'prev') go(i - 1); else if (a === 'reset') go(0);
+    });
+    scrub.addEventListener('input', () => { stop(); go(+scrub.value); });
+    host.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' && e.target !== scrub) return;
+      if (e.key === 'ArrowRight') { stop(); go(i + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { stop(); go(i - 1); e.preventDefault(); }
+    });
+    draw();
+    return {
+      setFrames(f) { stop(); frames = f; i = 0; draw(); },
+      go, stop,
+      get index() { return i; },
+    };
+  };
+
+  // Multiple-choice check with instant feedback
+  Lab.check = function (host, { lesson, key, q, options, answer, why, label = 'ลองตอบ' }) {
+    const box = document.createElement('div');
+    box.className = 'check';
+    box.innerHTML = `<div class="ck">${label}</div><div class="q">${q}</div>
+      <div class="opts">${options.map((o, n) => `<button class="opt" data-n="${n}"><span class="ol">${'กขคงจ'[n]}</span><span>${o}</span></button>`).join('')}</div>
+      <div class="fb"></div>`;
+    host.append(box);
+    const fb = box.querySelector('.fb');
+    const done = progress.get(lesson).includes(key);
+    function solve(showAll) {
+      box.querySelectorAll('.opt').forEach((b) => {
+        b.disabled = true;
+        if (+b.dataset.n === answer) b.classList.add('right'); else b.classList.add('dim');
+      });
+      fb.innerHTML = `<span class="yes">ถูกต้อง</span> · ${why}`;
+      fb.classList.add('on');
+      if (!showAll) progress.mark(lesson, key);
+    }
+    if (done) solve(true);
+    box.addEventListener('click', (e) => {
+      const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+      if (+b.dataset.n === answer) { solve(false); return; }
+      b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong');
+      b.disabled = true;
+      fb.innerHTML = `<span class="no">ยังไม่ใช่</span> · ลองอีกครั้ง`;
+      fb.classList.add('on');
+    });
+  };
+
+  /* ---------- pages ---------- */
+  const app = () => document.getElementById('app');
+
+  function topbar(where, chCls) {
+    return `<header class="top ${chCls || ''}"><div class="wrap in">
+      <a class="brand" href="#"><span class="dot"></span>Algo Playground</a>
+      <span class="where">${where || ''}</span><span class="sp"></span><span class="count"></span></div>
+      <div class="readbar"></div></header>`;
+  }
+
+  function renderHome() {
+    current = null;
+    const ready = Object.fromEntries(lessons.map((l) => [l.id, l]));
+    const chapters = Object.keys(CH).map((c) => {
+      const tiles = CATALOG[c].map(([id, title, blurb, g], n) => {
+        const L = ready[id];
+        const done = L ? progress.get(id).length : 0;
+        const st = L
+          ? (done ? `<div class="prog"><i style="width:${Math.round((done / L.checks) * 100)}%"></i></div><span>${done}/${L.checks}</span>` : `<span class="pill">เริ่มเรียน</span>`)
+          : `<span class="pill">เร็ว ๆ นี้</span>`;
+        const tag = L ? 'a' : 'div';
+        return `<${tag} class="tile ${L ? 'open' : 'soon'}" ${L ? `href="#${id}"` : 'aria-disabled="true"'}>
+          <div class="gl">${glyph(g)}</div><h3>${title}</h3><p>${blurb}</p><div class="st">${st}</div></${tag}>`;
+      }).join('');
+      return `<section class="chapter c-${c}"><div class="chead"><span class="num">${CH[c].n}</span><h2>${CH[c].name}</h2><p>${CH[c].th}</p></div>
+        <div class="tiles" style="--cols:${CATALOG[c].length === 6 ? 3 : CATALOG[c].length}">${tiles}</div></section>`;
+    }).join('');
+
+    app().innerHTML = topbar('254383 · หลังสอบกลางภาค') + `
+      <main class="wrap">
+        <section class="hero">
+          <div class="eyebrow">254383 ALGORITHM DESIGN AND ANALYSIS · สัปดาห์ 11–15</div>
+          <h1>Watch algorithms<br>work, <span class="s1">step</span> <span class="s2">by</span> <span class="s3">step.</span></h1>
+          <p class="lead">กดเล่น กดย้อน เปลี่ยนตัวเลขเอง แล้วดูว่าตารางกับกราฟเปลี่ยนยังไง ทุกบทใช้ตัวอย่างเดียวกับสไลด์ในห้อง</p>
+          <div class="herostrip c-st"><div class="scroll"><div id="heroStrip"></div></div>
+            <div class="hs-cap"><span id="heroCap">Horspool กำลังหาคำว่า GREEDY</span><a href="#horspool">เปิดบท Horspool →</a></div></div>
+        </section>
+        ${chapters}
+        <footer class="foot">ตัวอย่างอ้างอิงสไลด์ week7rev01, week8rev02, week9rev02 และ Levitin บทที่ 7–9 · ความคืบหน้าเก็บไว้ในเบราว์เซอร์นี้เท่านั้น</footer>
+      </main>`;
+    heroAnim();
+  }
+
+  function heroAnim() {
+    const host = document.getElementById('heroStrip');
+    if (!host || !Lab.horspool) return;
+    const text = 'SPACE_TIME_DP_GREEDY';
+    const pat = 'GREEDY';
+    const frames = Lab.horspool.frames(text, pat).filter((f) => f.kind !== 'cmp' || f.last);
+    let i = 0;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const draw = () => { Lab.horspool.drawStrip(host, text, pat, frames[i]); const c = document.getElementById('heroCap'); if (c) c.innerHTML = frames[i].plain || 'Horspool กำลังหาคำว่า GREEDY'; };
+    if (reduce) { i = frames.length - 1; draw(); return; }
+    draw();
+    const t = setInterval(() => {
+      if (!document.body.contains(host)) { clearInterval(t); return; }
+      i = i >= frames.length - 1 ? 0 : i + 1; draw();
+    }, 1100);
+  }
+
+  function renderLesson(L) {
+    current = L;
+    const ch = CH[L.ch];
+    const order = CATALOG[L.ch].map((x) => x[0]);
+    const all = Object.keys(CH).flatMap((c) => CATALOG[c].map((x) => x[0])).filter((id) => lessons.some((l) => l.id === id));
+    const idx = all.indexOf(L.id);
+    const nextId = all[(idx + 1) % all.length];
+    const nextL = lessons.find((l) => l.id === nextId);
+    app().innerHTML = topbar(`${ch.name} · ${L.title}`, 'c-' + L.ch) + `
+      <main class="wrap c-${L.ch}">
+        <header class="lhead col">
+          <div class="chip"><i></i>${ch.n} · ${ch.name}</div>
+          <h1>${L.title}</h1><div class="sub">${L.sub}</div>
+          <div class="meta"><span>${L.minutes} นาที</span><span>${L.checks} คำถามระหว่างทาง</span><span>ใช้ตัวอย่างจากสไลด์ ${L.slide}</span></div>
+        </header>
+        <div id="lbody"></div>
+        <nav class="next col"><a class="btn ghost" href="#">← ทุกบทเรียน</a>${nextL && nextL !== L ? `<a class="btn" href="#${nextL.id}">บทถัดไป: ${nextL.title} →</a>` : ''}</nav>
+      </main>`;
+    L.mount(document.getElementById('lbody'), Lab);
+    updateCount();
+  }
+
+  function onScroll() {
+    const bar = document.querySelector('.readbar');
+    if (!bar) return;
+    const h = document.documentElement;
+    const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
+    bar.style.width = (p * 100).toFixed(1) + '%';
+  }
+
+  function route() {
+    const id = location.hash.slice(1);
+    const L = lessons.find((l) => l.id === id);
+    if (L) renderLesson(L); else renderHome();
+    window.scrollTo(0, 0);
+    onScroll();
+  }
+
+  /* helper for lessons: beat section */
+  Lab.beat = function (host, { kick, title, html = '', wide = false }) {
+    const s = document.createElement('section');
+    s.className = 'beat';
+    s.innerHTML = `<div class="col">${kick ? `<div class="kick">${kick}</div>` : ''}${title ? `<h2>${title}</h2>` : ''}${html}</div>`;
+    const slot = document.createElement('div');
+    slot.className = wide ? 'wide' : 'col';
+    s.append(slot);
+    host.append(s);
+    return slot;
+  };
+
+  /* ---------- more shared helpers ---------- */
+  Lab.stage = function (slot) { const d = document.createElement('div'); d.className = 'stage'; slot.append(d); return d; };
+  Lab.gap = function (el, h = 14) { const d = document.createElement('div'); d.style.height = h + 'px'; el.append(d); };
+  Lab.exam = function (root, lesson, qs) {
+    const s = Lab.beat(root, { kick: 'ข้อสอบจำลอง', title: 'แบบที่ออกบ่อย' });
+    qs.forEach((q, n) => { if (n) Lab.gap(s); Lab.check(s, Object.assign({ lesson, label: `ข้อ ${n + 1}` }, q)); });
+  };
+  Lab.recap = function (root, items) {
+    const s = Lab.beat(root, {});
+    s.innerHTML = `<div class="recap"><h2>สรุป${items.length === 3 ? ' 3 บรรทัด' : ''}</h2><ol>${items.map((i) => `<li>${i}</li>`).join('')}</ol></div>`;
+  };
+  Lab.fmt = (x) => (x === Infinity ? '∞' : typeof x === 'number' && !Number.isInteger(x) ? String(+x.toFixed(2)) : String(x));
+
+  // rows of cells: rows = [{label, cells:[{v, cls}], idx:bool}]
+  Lab.cellRows = function (rows) {
+    return `<div class="scroll"><div class="cellrows">${rows.map((r) => `<div class="lb">${r.label || ''}</div><div class="cells ${r.idx ? 'idx' : ''}">${r.cells.map((c) => `<div class="c ${c.cls || ''}">${c.v == null ? '' : esc(c.v)}</div>`).join('')}</div>`).join('')}</div></div>`;
+  };
+
+  // general graph drawing. G = {pos:{v:[x,y]}, E:[[u,v,w]], directed}
+  let gid = 0;
+  Lab.graph = function (G, o = {}) {
+    const w = o.w || 560, h = o.h || 290, id = 'g' + (++gid);
+    const V = Object.keys(G.pos);
+    let s = `<svg class="gsvg" viewBox="0 0 ${w} ${h}"${o.maxw ? ` style="max-width:${o.maxw}px"` : ''} role="img" aria-label="กราฟ">`;
+    if (G.directed) s += `<defs><marker id="${id}m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink-3)"/></marker></defs>`;
+    for (const [u, v, wt] of G.E) {
+      const [x1, y1] = G.pos[u], [x2, y2] = G.pos[v];
+      const cls = 'ed ' + (o.edgeCls ? o.edgeCls(u, v, wt) || '' : '');
+      const L = Math.hypot(x2 - x1, y2 - y1);
+      let ex = x2, ey = y2;
+      if (G.directed) { ex = x2 - ((x2 - x1) / L) * 26; ey = y2 - ((y2 - y1) / L) * 26; }
+      s += `<line class="${cls}" x1="${x1}" y1="${y1}" x2="${ex}" y2="${ey}"${G.directed ? ` marker-end="url(#${id}m)"` : ''}/>`;
+      if (wt != null && !o.noW) {
+        const nx = -(y2 - y1) / L, ny = (x2 - x1) / L, off = o.wOff || 14, t = o.wPos ? o.wPos(u, v) : 0.5;
+        s += `<text class="wl" x="${x1 + (x2 - x1) * t + nx * off}" y="${y1 + (y2 - y1) * t + ny * off + 5}">${wt}</text>`;
+      }
+    }
+    for (const v of V) {
+      const [x, y] = G.pos[v];
+      const cls = 'nd ' + (o.nodeCls ? o.nodeCls(v) || '' : '');
+      const fill = o.nodeFill ? o.nodeFill(v) : null;
+      s += `<g class="${cls}" data-v="${v}"><circle cx="${x}" cy="${y}" r="${o.r || 21}"${fill ? ` style="fill:${fill};stroke:${fill}"` : ''}/><text x="${x}" y="${y}"${fill ? ' style="fill:#fff"' : ''}>${v}</text></g>`;
+      const b = o.badge ? o.badge(v) : null;
+      if (b != null) {
+        const below = o.badgeBelow ? o.badgeBelow(v) : y > h / 2;
+        const ly = below ? y + 40 : y - 40;
+        const bw = Math.max(44, String(b.t).length * 9 + 16);
+        s += `<g class="dl ${b.cls || ''}"><rect x="${x - bw / 2}" y="${ly - 13}" width="${bw}" height="26" rx="8"/><text x="${x}" y="${ly}">${b.t}</text></g>`;
+      }
+    }
+    return s + '</svg>';
+  };
+
+  // binary tree drawing. nodes: {id: {l, r, label, sub, cls, box}} root id. edge labels via o.bits
+  Lab.tree = function (nodes, root, o = {}) {
+    const order = [], depth = {};
+    (function walk(n, d) { if (n == null) return; walk(nodes[n].l, d + 1); order.push(n); depth[n] = d; walk(nodes[n].r, d + 1); })(root, 0);
+    const maxD = Math.max(...Object.values(depth));
+    const w = o.w || Math.max(260, order.length * (o.gapX || 64) + 40), lh = o.levelH || 70, h = (maxD + 1) * lh + 30 + (o.extraH || 0);
+    const X = {}, Y = {};
+    order.forEach((n, i) => { X[n] = 20 + (w - 40) * (order.length === 1 ? 0.5 : i / (order.length - 1)); Y[n] = 30 + depth[n] * lh; });
+    let s = `<svg class="gsvg" viewBox="0 0 ${w} ${h}"${o.maxw ? ` style="max-width:${o.maxw}px"` : ''} role="img" aria-label="ต้นไม้">`;
+    for (const n of order) for (const [side, c] of [['0', nodes[n].l], ['1', nodes[n].r]]) {
+      if (c == null) continue;
+      const on = o.edgeOn ? o.edgeOn(n, c) : false;
+      s += `<line class="tl ${on ? 'on' : ''}" x1="${X[n]}" y1="${Y[n]}" x2="${X[c]}" y2="${Y[c]}"/>`;
+      if (o.bits) s += `<text class="bit" x="${(X[n] + X[c]) / 2 + (side === '0' ? -9 : 9)}" y="${(Y[n] + Y[c]) / 2 - 4}">${side}</text>`;
+    }
+    for (const n of order) {
+      const nd = nodes[n];
+      if (nd.box) {
+        const bw = Math.max(40, String(nd.label).length * 10 + 18);
+        s += `<g class="bx ${nd.cls || ''}"><rect x="${X[n] - bw / 2}" y="${Y[n] - 17}" width="${bw}" height="34" rx="8"/><text x="${X[n]}" y="${Y[n]}"${String(nd.label).length > 2 ? ' style="font-size:13px"' : ''}>${nd.label}</text></g>`;
+      } else {
+        s += `<g class="nd ${nd.cls || ''}"><circle cx="${X[n]}" cy="${Y[n]}" r="${o.r || 19}"/><text x="${X[n]}" y="${Y[n]}"${String(nd.label).length > 2 ? ' style="font-size:13px"' : ''}>${nd.label}</text></g>`;
+      }
+      if (nd.sub != null) s += `<text class="sub" x="${X[n]}" y="${Y[n] + (nd.box ? 29 : 32)}">${nd.sub}</text>`;
+    }
+    return s + '</svg>';
+  };
+
+  Lab.start = function () {
+    window.addEventListener('hashchange', route);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    route();
+  };
+})();
