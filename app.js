@@ -221,9 +221,8 @@
     const pat = 'GREEDY';
     const frames = Lab.horspool.frames(text, pat).filter((f) => f.kind !== 'cmp' || f.last);
     let i = 0;
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Keeps stepping even with Reduce Motion on: the CSS drops the sliding transition, so each step jumps instead.
     const draw = () => { Lab.horspool.drawStrip(host, text, pat, frames[i]); const c = document.getElementById('heroCap'); if (c) c.innerHTML = frames[i].plain || 'Horspool กำลังหาคำว่า GREEDY'; };
-    if (reduce) { i = frames.length - 1; draw(); return; }
     draw();
     const t = setInterval(() => {
       if (!document.body.contains(host)) { clearInterval(t); return; }

@@ -49,7 +49,8 @@ b,strong{font-weight:600}
 .k.bad{background:var(--bad-bg);color:var(--bad);font-weight:600}
 .k.skip{background:color-mix(in srgb,var(--skip) 16%,transparent);color:var(--skip);font-weight:600}
 .k.take{background:color-mix(in srgb,var(--take) 18%,transparent);color:var(--take);font-weight:600}
-h1,h2,h3{font-family:var(--f-display);text-wrap:balance;letter-spacing:-.01em;margin:0}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;letter-spacing:-.01em;margin:0;overflow-wrap:anywhere}
+.cap,.beat p,.q,.calc{overflow-wrap:anywhere}
 
 /* ---------- top bar ---------- */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
@@ -67,7 +68,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;letter-spacing:-.01em;ma
 .hero h1{font-size:clamp(40px,7.4vw,84px);line-height:1.2;font-weight:700;margin-top:14px}
 .hero h1 .s1{color:var(--st)} .hero h1 .s2{color:var(--dp)} .hero h1 .s3{color:var(--gr)}
 .hero p.lead{font-size:19px;color:var(--ink-2);max-width:620px;margin:18px 0 0}
-.herostrip #heroStrip{display:flex;justify-content:center}
+.herostrip .strip{margin-inline:auto}
 .herostrip{margin-top:40px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px 22px 16px}
 .herostrip .hs-cap{font-size:14px;color:var(--ink-3);margin-top:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .exam{display:inline-flex;gap:10px;align-items:baseline;margin-top:22px;font-size:15px;color:var(--ink-2)}
@@ -114,7 +115,7 @@ footer.foot{padding-block:40px 60px;color:var(--ink-3);font-size:14px;border-top
 .rule .lbl{font-family:var(--f-body);font-size:13.5px;color:var(--ink-3);display:block;line-height:1.4}
 
 .stage{background-color:var(--surface);background-image:radial-gradient(color-mix(in srgb,var(--ink) 9%,transparent) 1px,transparent 1.2px);background-size:20px 20px;background-position:10px 10px;border:1px solid var(--line);border-radius:18px;padding:22px;margin-top:6px}
-.stage .scroll{overflow-x:auto;padding-bottom:4px}
+.scroll{overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;max-width:100%}
 .cap{font-size:17px;line-height:1.6;min-height:3.3em;padding:16px 2px 4px;color:var(--ink)}
 .cap .muted{color:var(--ink-3)}
 .stepper{display:flex;align-items:center;gap:8px;padding-top:14px;border-top:1px solid var(--line);margin-top:14px}
@@ -398,8 +399,23 @@ table.dt .stt{font-family:var(--f-body);font-weight:500;font-size:13px;color:var
   table.kt th.rowh small{display:none}
   .beat{padding-block:26px}
 }
-@media (prefers-reduced-motion: reduce){
-  *{transition:none!important;animation:none!important}
+/* phones */
+@media (max-width:440px){
+  .stepper{gap:6px}
+  .sbtn{width:40px;height:40px}
+  .scrub{min-width:36px}
+  .scount{min-width:0;font-size:12px}
+  .opts{grid-template-columns:1fr}
+  .wrap{padding-inline:16px}
+  .brand{white-space:nowrap}
+  .top .where{display:none}
+  /* graphs are drawn in a ~560-unit viewBox and shrink to ~340px: enlarge their text */
+  .gsvg .nd text{font-size:24px}
+  .gsvg .wl{font-size:21px;stroke-width:7px}
+  .gsvg .dl text{font-size:18px}
+  .gsvg .bx text{font-size:17px}
+  .gsvg .sub{font-size:15px}
+  .gsvg .bit{font-size:17px}
 }
 </style>
 <div id="app"></div>

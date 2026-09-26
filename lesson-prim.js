@@ -27,7 +27,7 @@
       return chg;
     };
     const fr = [];
-    const snap = (o) => Object.assign({ inT: inT.slice(), tree: tree.slice(), lab: JSON.parse(JSON.stringify(lab)), total }, o);
+    const snap = (o) => Object.assign({ inT: inT.slice(), tree: tree.slice(), lab: Object.fromEntries(Object.entries(lab).map(([k, x]) => [k, { ...x }])), total }, o);
     relabel();
     fr.push(snap({ cap: `เริ่มที่ ${K(s, 'acc')} · จุดที่ติดกับต้นไม้ได้ป้าย (มาจากไหน, น้ำหนัก) ที่เหลือ = ∞` }));
     while (inT.length < V.length) {
