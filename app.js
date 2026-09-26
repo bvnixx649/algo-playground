@@ -201,10 +201,9 @@
         <div class="tiles" style="--cols:${CATALOG[c].length === 6 ? 3 : CATALOG[c].length}">${tiles}</div></section>`;
     }).join('');
 
-    app().innerHTML = topbar('254383 · หลังสอบกลางภาค') + `
+    app().innerHTML = topbar('') + `
       <main class="wrap">
         <section class="hero">
-          <div class="eyebrow">254383 ALGORITHM DESIGN AND ANALYSIS · สัปดาห์ 11–15</div>
           <h1>Watch algorithms<br>work, <span class="s1">step</span> <span class="s2">by</span> <span class="s3">step.</span></h1>
           <p class="lead">กดเล่น กดย้อน เปลี่ยนตัวเลขเอง แล้วดูว่าตารางกับกราฟเปลี่ยนยังไง ทุกบทใช้ตัวอย่างเดียวกับสไลด์ในห้อง</p>
           <div class="herostrip c-st"><div class="scroll"><div id="heroStrip"></div></div></div>
