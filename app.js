@@ -91,19 +91,19 @@
     cap.setAttribute('aria-live', 'polite');
     const bar = document.createElement('div');
     bar.className = 'stepper';
-    bar.innerHTML = `<button class="sbtn" data-a="reset" aria-label="เริ่มใหม่">${ICON.reset}</button>
-      <button class="sbtn" data-a="prev" aria-label="ย้อนหนึ่งขั้น">${ICON.prev}</button>
-      <button class="sbtn play" data-a="play" aria-label="เล่นอัตโนมัติ">${ICON.play}</button>
-      <button class="sbtn" data-a="next" aria-label="ขั้นถัดไป">${ICON.next}</button>
-      <input class="scrub" type="range" min="0" value="0" aria-label="เลื่อนดูทีละขั้น">
-      <span class="scount"></span>`;
+    bar.innerHTML = `<div class="srow"><input class="scrub" type="range" min="0" value="0" aria-label="เลื่อนดูทีละขั้น">
+        <span class="scount"></span>
+        <button class="sbtn play" data-a="play" aria-label="เล่นอัตโนมัติ">${ICON.play}</button></div>
+      <div class="snav"><button class="navb" data-a="prev" aria-label="ย้อนหนึ่งขั้น">${ICON.prev}<span>ย้อน</span></button>
+        <button class="navb main" data-a="next" aria-label="ขั้นถัดไป"><span>ถัดไป</span>${ICON.next}</button></div>`;
     host.append(stage, cap, bar);
     host.tabIndex = 0;
     const scrub = bar.querySelector('.scrub');
     const count = bar.querySelector('.scount');
     const playBtn = bar.querySelector('[data-a="play"]');
+    const prevBtn = bar.querySelector('[data-a="prev"]'), nextBtn = bar.querySelector('[data-a="next"]');
     let frames = opts.frames, i = 0, timer = null;
-    const speed = opts.speed || 1000;
+    const speed = (opts.speed || 1000) * 1.7; // autoplay pace, slowed for reading
 
     function draw() {
       const html = opts.render(stage, frames[i], i, frames);
@@ -111,6 +111,8 @@
       scrub.max = frames.length - 1;
       scrub.value = i;
       count.textContent = `${i + 1}/${frames.length}`;
+      prevBtn.disabled = i === 0;
+      nextBtn.disabled = i === frames.length - 1;
       if (opts.onStep) opts.onStep(i, frames);
     }
     function go(n) { i = Math.max(0, Math.min(frames.length - 1, n)); draw(); }
@@ -208,7 +210,6 @@
           <div class="herostrip c-st"><div class="scroll"><div id="heroStrip"></div></div></div>
         </section>
         ${chapters}
-        <footer class="foot">ตัวอย่างอ้างอิงสไลด์ week7rev01, week8rev02, week9rev02 และ Levitin บทที่ 7–9 · ความคืบหน้าเก็บไว้ในเบราว์เซอร์นี้เท่านั้น</footer>
       </main>`;
     heroAnim();
   }
