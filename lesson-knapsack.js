@@ -27,7 +27,7 @@
         else {
           const dg = F[i - 1][j - w];
           fr.push({ upto: [i, j], cur: [i, j], up: [i - 1, j], dg: [i - 1, j - w],
-            cap: `F(${i},${j}) = max( ไม่ใส่ ${K(up, 'skip')} , ใส่ ${v} + F(${i - 1},${j - w}) = ${K(v + dg, 'take')} ) = <b>${F[i][j]}</b>` });
+            cap: `F(${i},${j}) = max( ไม่ใส่ F(${i - 1},${j}) = ${K(up, 'skip')} , ใส่ v${i} + F(${i - 1},${j - w}) = ${v} + ${dg} = ${K(v + dg, 'take')} ) = <b>${F[i][j]}</b>` });
         }
       }
     fr.push({ upto: [n, W], done: true, cap: `เติมครบ คำตอบอยู่มุมขวาล่าง F(${n},${W}) = <b>${F[n][W]}</b>` });

@@ -72,6 +72,28 @@
 
   Lab.glyph = glyph;
 
+  /* ---------- what each symbol means, per lesson ---------- */
+  const SYMS = {
+    counting: [['A', 'อาร์เรย์ที่ยังไม่เรียง'], ['S', 'อาร์เรย์ผลลัพธ์ที่เรียงแล้ว'], ['Count[i]', 'จำนวนตัวที่น้อยกว่า A[i] = ช่องที่ A[i] ต้องไปอยู่ใน S'], ['D[v]', 'หลังบวกสะสม: จำนวนตัวที่ ≤ v'], ['[l, u]', 'ช่วงของค่าที่เป็นไปได้']],
+    horspool: [['m', 'ความยาวของ pattern'], ['c', 'ตัวอักษรใน text ที่อยู่ใต้ตัวท้ายของ pattern'], ['t(c)', 'จำนวนช่องที่เลื่อน pattern ไปทางขวา']],
+    boyer: [['m', 'ความยาวของ pattern'], ['c', 'ตัวอักษรใน text ที่เทียบแล้วไม่ตรง'], ['k', 'จำนวนตัวท้ายที่เทียบตรงแล้วก่อนเจอตัวที่ไม่ตรง'], ['t₁(c)', 'ค่าจากตาราง Horspool'], ['d₁', 'ระยะเลื่อนจากตัวที่ไม่ตรง (bad-symbol)'], ['d₂(k)', 'ระยะเลื่อนจากส่วนท้ายที่ตรงแล้ว k ตัว (good-suffix)']],
+    hashing: [['K', 'key ที่จะเก็บ เช่นคำหนึ่งคำ'], ['h(K)', 'เลขช่องที่ K ต้องลงไป'], ['m', 'จำนวนช่องของตาราง'], ['mod', 'เศษจากการหาร']],
+    btree: [['m', 'order = จำนวนลูกมากที่สุดของหนึ่ง node'], ['⌈m/2⌉', 'จำนวนลูกน้อยที่สุดของ node ภายใน'], ['n', 'จำนวน key ทั้งหมด']],
+    coinrow: [['n', 'ใช้ได้แค่เหรียญที่ 1 ถึง n'], ['cₙ', 'มูลค่าของเหรียญที่ n'], ['F(n)', 'เงินมากสุดที่หยิบได้จากเหรียญ n เหรียญแรก'], ['F(n−1)', 'ไม่หยิบเหรียญที่ n'], ['cₙ + F(n−2)', 'หยิบเหรียญที่ n แล้วเหรียญ n−1 ห้ามหยิบ']],
+    change: [['n', 'ยอดเงินที่ต้องทอน'], ['dⱼ', 'มูลค่าเหรียญชนิดที่ j'], ['F(n)', 'จำนวนเหรียญน้อยสุดที่ทอน n ได้'], ['F(n − dⱼ)', 'ยอดที่เหลือหลังใช้เหรียญ dⱼ ไป 1 เหรียญ'], ['+ 1', 'นับเหรียญ dⱼ เหรียญนั้น']],
+    collect: [['i, j', 'แถวที่ i คอลัมน์ที่ j ของกระดาน'], ['cᵢⱼ', '1 ถ้าช่อง (i, j) มีเหรียญ ไม่มีเป็น 0'], ['F(i, j)', 'เหรียญมากสุดที่เก็บได้เมื่อเดินมาถึงช่อง (i, j)'], ['F(i−1, j)', 'มาจากช่องบน'], ['F(i, j−1)', 'มาจากช่องซ้าย']],
+    knapsack: [['i', 'ชิ้นที่กำลังคิด (แถว)'], ['j', 'ความจุของเป้ (คอลัมน์)'], ['wᵢ', 'น้ำหนักของชิ้นที่ i'], ['vᵢ', 'มูลค่าของชิ้นที่ i'], ['F(i, j)', 'มูลค่ามากสุด ถ้าใช้ได้แค่ชิ้น 1…i และเป้จุ j'], ['F(i−1, j)', 'ไม่ใส่ชิ้น i: ช่องบน'], ['vᵢ + F(i−1, j−wᵢ)', 'ใส่ชิ้น i: ได้ vᵢ แล้วเป้เหลือ j−wᵢ']],
+    obst: [['pᵢ', 'ความน่าจะเป็นที่จะค้นหา key ที่ i'], ['C(i, j)', 'จำนวนครั้งเทียบเฉลี่ยน้อยสุดของ BST ที่สร้างจาก key i…j'], ['k', 'key ที่ลองเลือกเป็น root'], ['C(i, k−1), C(k+1, j)', 'ต้นซ้ายและต้นขวาของ k'], ['pᵢ + … + pⱼ', 'ทุก key ลึกลงอีกหนึ่งชั้น จึงบวกความน่าจะเป็นรวม'], ['R(i, j)', 'k ที่ดีที่สุด (root)']],
+    floyd: [['k', 'จุดแวะที่เพิ่มเข้ามาในรอบนี้'], ['R⁽ᵏ⁾[i, j]', '1 ถ้าไปจาก i ถึง j ได้ โดยแวะได้แค่จุด 1…k'], ['D⁽ᵏ⁾[i, j]', 'ระยะสั้นสุดจาก i ไป j โดยแวะได้แค่จุด 1…k'], ['[i, k] + [k, j]', 'ไป i → k แล้วต่อ k → j']],
+    prim: [['|V|', 'จำนวนจุดในกราฟ'], ['u*', 'จุดที่เพิ่งถูกเพิ่มเข้าต้นไม้'], ['ป้าย (x, w)', 'จุดในต้นไม้ที่ใกล้สุดคือ x ห่าง w'], ['∞', 'ยังไม่มี edge ต่อกับต้นไม้']],
+    kruskal: [['|V|', 'จำนวนจุดในกราฟ'], ['|V| − 1', 'จำนวน edge ของ spanning tree']],
+    dijkstra: [['d(v)', 'ระยะสั้นสุดจากจุดเริ่มถึง v ที่รู้ตอนนี้ (∞ = ยังไปไม่ถึง)'], ['u', 'จุดที่เพิ่งปิดถาวร'], ['w(u, v)', 'น้ำหนัก edge จาก u ไป v'], ['มาจาก', 'จุดก่อนหน้าบนเส้นทางสั้นสุด']],
+    huffman: [['p', 'ความถี่ (น้ำหนัก) ของตัวอักษร'], ['ความยาวรหัส', 'จำนวน bit = ความลึกของใบ'], ['bit เฉลี่ย', 'Σ ความยาวรหัส × p']],
+  };
+  Lab.SYMS = SYMS;
+  const symList = (syms) => `<dl class="syms">${syms.map(([a, b]) => `<div><dt>${esc(a)}</dt><dd>${esc(b)}</dd></div>`).join('')}</dl>`;
+  Lab.symList = symList;
+
   /* ---------- progress ---------- */
   const progress = {
     get(id) { return store.get('done:' + id, []); },
@@ -272,6 +294,14 @@
         <nav class="next col"><a class="btn ghost" href="#">← ทุกบทเรียน</a>${nextL && nextL !== L ? `<a class="btn" href="#${nextL.id}">บทถัดไป: ${nextL.title} →</a>` : ''}</nav>
       </main>`;
     L.mount(document.getElementById('lbody'), Lab);
+    const syms = SYMS[L.id];
+    if (syms) {
+      const body = document.getElementById('lbody');
+      const rule = body.querySelector('.beat.core .rule');
+      const host = rule || body.querySelector('.beat.core .col');
+      if (host) host.insertAdjacentHTML(rule ? 'afterend' : 'beforeend', symList(syms));
+      body.querySelectorAll('.swork .swh').forEach((h) => h.insertAdjacentHTML('afterend', `<details class="symk"><summary>ตัวแปรแต่ละตัวคืออะไร</summary>${symList(syms)}</details>`));
+    }
     updateCount();
   }
 
@@ -301,7 +331,7 @@
     const fold = /^ลองเอง/.test(kick || '');
     const s = document.createElement('section');
     s.className = 'beat ' + tier;
-    const kk = tier === 'core' ? `★ ต้องจำ${kick ? ' · ' + kick : ''}` : kick;
+    const kk = tier === 'core' ? '' : kick;
     s.innerHTML = `<div class="col">${kk ? `<div class="kick">${kk}</div>` : ''}${title ? `<h2>${title}</h2>` : ''}${html}</div>`;
     const slot = document.createElement('div');
     slot.className = wide ? 'wide' : 'col';

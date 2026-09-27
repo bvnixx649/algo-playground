@@ -46,6 +46,7 @@
       <div class="stage pstage"></div>
       <div class="phint" aria-live="polite"></div>
       <div class="pbar"><button class="btn ghost hintb">คำใบ้</button><span class="pprog"></span><span class="sp"></span><button class="btn newb">โจทย์ใหม่</button></div>
+      ${Lab.SYMS[D.id] ? `<details class="symk"><summary>ตัวแปรแต่ละตัวคืออะไร</summary>${Lab.symList(Lab.SYMS[D.id])}</details>` : ''}
       <ol class="work"></ol>`;
     const stage = host.querySelector('.pstage'), hintEl = host.querySelector('.phint'), prog = host.querySelector('.pprog'), workEl = host.querySelector('.work');
     let inst = null;
