@@ -99,7 +99,25 @@
         <button class="sbtn play" data-a="play" aria-label="เล่นอัตโนมัติ">${ICON.play}</button></div>
       <div class="snav"><button class="navb" data-a="prev" aria-label="ย้อนหนึ่งขั้น">${ICON.prev}<span>ย้อน</span></button>
         <button class="navb main" data-a="next" aria-label="ขั้นถัดไป"><span>ถัดไป</span>${ICON.next}</button></div>`;
+    // written working: every step's caption so far, like a worked solution on paper
+    const work = document.createElement('div');
+    work.className = 'swork';
+    work.innerHTML = `<div class="swh"><h3>วิธีคำนวณ</h3><button class="swall">แสดงทุกขั้น</button></div><ol></ol>`;
+    const hasWork = opts.work !== false && opts.frames.length > 2 && opts.frames.every((f) => f && typeof f.cap === 'string');
     host.append(stage, cap, bar);
+    if (hasWork) host.append(work);
+    let showAll = false;
+    work.querySelector('.swall').onclick = () => { showAll = !showAll; work.querySelector('.swall').textContent = showAll ? 'ถึงขั้นปัจจุบัน' : 'แสดงทุกขั้น'; drawWork(); };
+    const ol = work.querySelector('ol');
+    function drawWork() {
+      if (!hasWork || !frames.every((f) => typeof f.cap === 'string')) { work.hidden = true; return; }
+      work.hidden = false;
+      const upto = showAll ? frames.length - 1 : i;
+      ol.innerHTML = frames.slice(0, upto + 1).map((f, k) => `<li class="${k === i ? 'now' : k > i ? 'later' : ''}" data-k="${k}"><span class="n">${k + 1}</span><span>${f.cap}</span></li>`).join('');
+      const now = ol.querySelector('.now');
+      if (now) ol.scrollTop = now.offsetTop - ol.clientHeight / 2;
+    }
+    ol.addEventListener('click', (e) => { const li = e.target.closest('li'); if (li) { stop(); go(+li.dataset.k); } });
     host.tabIndex = 0;
     const scrub = bar.querySelector('.scrub');
     const count = bar.querySelector('.scount');
@@ -117,6 +135,7 @@
       prevBtn.disabled = i === 0;
       nextBtn.disabled = i === frames.length - 1;
       if (opts.onStep) opts.onStep(i, frames);
+      drawWork();
     }
     function go(n) { i = Math.max(0, Math.min(frames.length - 1, n)); draw(); }
     function stop() { clearInterval(timer); timer = null; playBtn.innerHTML = ICON.play; playBtn.setAttribute('aria-label', 'เล่นอัตโนมัติ'); }
@@ -282,7 +301,8 @@
     const fold = /^ลองเอง/.test(kick || '');
     const s = document.createElement('section');
     s.className = 'beat ' + tier;
-    s.innerHTML = `<div class="col">${kick ? `<div class="kick">${kick}</div>` : ''}${title ? `<h2>${title}</h2>` : ''}${html}</div>`;
+    const kk = tier === 'core' ? `★ ต้องจำ${kick ? ' · ' + kick : ''}` : kick;
+    s.innerHTML = `<div class="col">${kk ? `<div class="kick">${kk}</div>` : ''}${title ? `<h2>${title}</h2>` : ''}${html}</div>`;
     const slot = document.createElement('div');
     slot.className = wide ? 'wide' : 'col';
     if (fold) {
