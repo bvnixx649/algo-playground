@@ -8,14 +8,15 @@
     for (let i = 0; i < n - 1; i++)
       for (let j = i + 1; j < n; j++) {
         const win = A[i] < A[j] ? j : i;
+        const before = C[win];
         C[win]++;
-        F.push({ C: C.slice(), a: i, b: j, win, cap: `${K(A[i])} กับ ${K(A[j])} → ${K(A[win], 'hi')} ใหญ่กว่า → Count[${win}] + 1 = ${C[win]}` });
+        F.push({ C: C.slice(), a: i, b: j, win, cap: `${K(A[i])} กับ ${K(A[j])} → ${K(A[win], 'hi')} ใหญ่กว่า → Count[${win}] = ${before} + 1 = ${C[win]}` });
       }
     F.push({ C: C.slice(), all: true, cap: `Count = จำนวนตัวที่<b>น้อยกว่า</b> = ตำแหน่งสุดท้ายของตัวนั้น เทียบไปทั้งหมด ${(n * (n - 1)) / 2} ครั้ง` });
     const S = Array(n).fill(null);
     for (let i = 0; i < n; i++) {
       S[C[i]] = A[i];
-      F.push({ C: C.slice(), S: S.slice(), put: i, cap: `A[${i}] = ${A[i]} มี ${C[i]} ตัวที่น้อยกว่า → วางที่ ${K('S[' + C[i] + ']', 'hi')}` });
+      F.push({ C: C.slice(), S: S.slice(), put: i, cap: `A[${i}] = ${A[i]} → S[Count[${i}]] = S[${C[i]}] = ${K('' + A[i], 'hi')}` });
     }
     F.push({ C: C.slice(), S: S.slice(), done: true, cap: 'เรียงเสร็จ ย้ายข้อมูลแค่ n ครั้ง แต่เทียบ n(n−1)/2 ครั้ง' });
     return F;
@@ -39,13 +40,13 @@
     const S = Array(n).fill(null);
     const snap = (o) => Object.assign({ D: D.slice(), S: S.slice(), l, u }, o);
     F.push(snap({ phase: 1, cap: `ค่าอยู่ในช่วง ${l}…${u} → เตรียม D ${u - l + 1} ช่อง เริ่มจากนับความถี่` }));
-    for (let i = 0; i < n; i++) { D[A[i] - l]++; F.push(snap({ phase: 1, ai: i, dj: A[i] - l, cap: `A[${i}] = ${A[i]} → D[${A[i]}] + 1 = ${D[A[i] - l]}` })); }
-    for (let j = 1; j < D.length; j++) { const before = D[j]; D[j] += D[j - 1]; F.push(snap({ phase: 2, dj: j, dprev: j - 1, cap: `สะสม: D[${j + l}] = ${D[j - 1]} + ${before} = <b>${D[j]}</b> (ค่า ≤ ${j + l} มี ${D[j]} ตัว)` })); }
+    for (let i = 0; i < n; i++) { const before = D[A[i] - l]; D[A[i] - l]++; F.push(snap({ phase: 1, ai: i, dj: A[i] - l, cap: `A[${i}] = ${A[i]} → D[${A[i]}] = ${before} + 1 = ${D[A[i] - l]}` })); }
+    for (let j = 1; j < D.length; j++) { const before = D[j]; D[j] += D[j - 1]; F.push(snap({ phase: 2, dj: j, dprev: j - 1, cap: `สะสม: D[${j + l}] = D[${j + l - 1}] + D[${j + l}] = ${D[j - 1]} + ${before} = <b>${D[j]}</b> (ค่า ≤ ${j + l} มี ${D[j]} ตัว)` })); }
     F.push(snap({ phase: 3, cap: `D ตอนนี้บอกว่า "ช่องสุดท้าย + 1" ของแต่ละค่า ต่อไปไล่ A จาก<b>ขวาไปซ้าย</b>` }));
     for (let i = n - 1; i >= 0; i--) {
-      const j = A[i] - l, pos = D[j] - 1;
+      const j = A[i] - l, before = D[j], pos = D[j] - 1;
       S[pos] = A[i]; D[j]--;
-      F.push(snap({ phase: 3, ai: i, dj: j, sp: pos, cap: `A[${i}] = ${A[i]} → วางที่ S[D[${A[i]}] − 1] = ${K('S[' + pos + ']', 'hi')} แล้วลด D[${A[i]}] เหลือ ${D[j]}` }));
+      F.push(snap({ phase: 3, ai: i, dj: j, sp: pos, cap: `A[${i}] = ${A[i]} → S[D[${A[i]}] − 1] = S[${before} − 1] = ${K('S[' + pos + ']', 'hi')} แล้วลด D[${A[i]}] เหลือ ${D[j]}` }));
     }
     F.push(snap({ done: true, cap: `เรียงเสร็จโดย<b>ไม่มีการเปรียบเทียบ</b>เลย ใช้เวลา Θ(n + (u − l))` }));
     return F;

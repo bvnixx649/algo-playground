@@ -21,16 +21,16 @@
     for (let i = 2; i <= n; i++) {
       const take = c[i - 1] + F[i - 2], skip = F[i - 1];
       fr.push({ upto: i, i, take: take >= skip,
-        cap: `F[${i}] = max( หยิบ c${i} ${K(c[i - 1] + ' + F[' + (i - 2) + '] = ' + take, 'take')} , ไม่หยิบ ${K('F[' + (i - 1) + '] = ' + skip, 'skip')} ) = <b>${F[i]}</b>` });
+        cap: `F[${i}] = max( ไม่หยิบ F[${i - 1}] = ${K(skip, 'skip')} , หยิบ c${i} + F[${i - 2}] = ${c[i - 1]} + ${F[i - 2]} = ${K(take, 'take')} ) = <b>${F[i]}</b>` });
     }
     const chosen = [];
     let i = n;
     while (i >= 1) {
-      if (i === 1) { chosen.push(1); fr.push({ upto: n, back: i, chosen: chosen.slice(), cap: `ถึง F[1] → หยิบ c1` }); break; }
-      if (c[i - 1] + F[i - 2] >= F[i - 1]) { chosen.push(i); fr.push({ upto: n, back: i, chosen: chosen.slice(), cap: `ย้อนรอย: F[${i}] = c${i} + F[${i - 2}] → <b>หยิบ c${i}</b> แล้วข้ามไป F[${i - 2}]` }); i -= 2; }
-      else { fr.push({ upto: n, back: i, chosen: chosen.slice(), cap: `ย้อนรอย: F[${i}] = F[${i - 1}] → ไม่หยิบ c${i}` }); i -= 1; }
+      if (i === 1) { chosen.push(1); fr.push({ upto: n, back: i, chosen: chosen.slice(), cap: `F[1] = c1 = ${c[0]} → หยิบ c1` }); break; }
+      if (c[i - 1] + F[i - 2] >= F[i - 1]) { chosen.push(i); fr.push({ upto: n, back: i, chosen: chosen.slice(), cap: `F[${i}] = c${i} + F[${i - 2}] = ${c[i - 1]} + ${F[i - 2]} = ${F[i]} → <b>หยิบ c${i}</b> แล้วข้ามไป F[${i - 2}]` }); i -= 2; }
+      else { fr.push({ upto: n, back: i, chosen: chosen.slice(), cap: `F[${i}] = F[${i - 1}] = ${F[i]} → ไม่หยิบ c${i}` }); i -= 1; }
     }
-    fr.push({ upto: n, chosen: pick, done: true, cap: `หยิบ ${pick.map((p) => 'c' + p).join(', ')} = ${pick.map((p) => c[p - 1]).join(' + ')} = <b>${F[n]}</b>` });
+    fr.push({ upto: n, chosen: pick, done: true, cap: `F[${n}] = ${pick.map((p) => 'c' + p).join(' + ')} = ${pick.map((p) => c[p - 1]).join(' + ')} = <b>${F[n]}</b>` });
     return { F, fr };
   }
 

@@ -30,10 +30,10 @@
     let i = n;
     while (i > 0 && via[i]) {
       used.push(via[i]);
-      fr.push({ upto: n, back: i, used: used.slice(), cap: `ย้อนรอย: F[${i}] ได้ค่าต่ำสุดจากเหรียญ ${K(via[i], 'hi')} → ไปที่ F[${i - via[i]}]` });
+      fr.push({ upto: n, back: i, used: used.slice(), cap: `F[${i}] = F[${i - via[i]}] + 1 = ${F[i - via[i]]} + 1 = ${F[i]} → เหรียญสุดท้าย ${K(via[i], 'hi')} ไปที่ F[${i - via[i]}]` });
       i -= via[i];
     }
-    fr.push({ upto: n, used, done: true, cap: `ยอด ${n} ใช้ <b>${F[n]} เหรียญ</b>: ${used.join(' + ')}` });
+    fr.push({ upto: n, used, done: true, cap: `${n} = ${used.join(' + ')} → ใช้ <b>${F[n]} เหรียญ</b>` });
     return { F, fr };
   }
 

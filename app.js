@@ -331,7 +331,9 @@
     const fold = /^ลองเอง/.test(kick || '');
     const s = document.createElement('section');
     s.className = 'beat ' + tier;
-    const kk = tier === 'core' ? '' : kick;
+    // no eyebrows: the role shows through weight, not labels
+    const kk = '';
+    if (kick === 'ข้อสอบจำลอง') title = 'ข้อสอบจำลอง';
     s.innerHTML = `<div class="col">${kk ? `<div class="kick">${kk}</div>` : ''}${title ? `<h2>${title}</h2>` : ''}${html}</div>`;
     const slot = document.createElement('div');
     slot.className = wide ? 'wide' : 'col';

@@ -13,7 +13,7 @@
     while (q.length > 1) {
       const s = roots();
       const a = s[0], b = s[1];
-      fr.push({ q: s, pick: [a.id, b.id], nodes: { ...nodes }, cap: `สองต้นที่เบาที่สุดคือ ${Lab.fmt(a.w)} กับ ${Lab.fmt(b.w)} → รวมเป็นต้นใหม่น้ำหนัก ${K(Lab.fmt(r2(a.w + b.w)), 'hi')}` });
+      fr.push({ q: s, pick: [a.id, b.id], nodes: { ...nodes }, cap: `สองต้นที่เบาที่สุดคือ ${Lab.fmt(a.w)} กับ ${Lab.fmt(b.w)} → น้ำหนักต้นใหม่ = ${Lab.fmt(a.w)} + ${Lab.fmt(b.w)} = ${K(Lab.fmt(r2(a.w + b.w)), 'hi')}` });
       const id = 'N' + cnt;
       nodes[id] = { label: Lab.fmt(r2(a.w + b.w)), l: a.id, r: b.id, w: r2(a.w + b.w) };
       q = q.filter((x) => x !== a && x !== b);
@@ -23,7 +23,7 @@
     const root = q[0].id, codes = {};
     (function walk(n, code) { const x = nodes[n]; if (x.box) { codes[x.label] = code || '0'; return; } walk(x.l, code + '0'); walk(x.r, code + '1'); })(root, '');
     const avg = r2(freqs.reduce((a, [s, f]) => a + codes[s].length * f, 0) / freqs.reduce((a, [, f]) => a + f, 0));
-    fr.push({ q: [q[0]], nodes: { ...nodes }, done: true, cap: `เหลือต้นเดียว · ซ้าย = 0 ขวา = 1 · รหัสคือเส้นทางจาก root ถึงใบ · เฉลี่ย ${avg} bit ต่อตัว` });
+    fr.push({ q: [q[0]], nodes: { ...nodes }, done: true, cap: `เหลือต้นเดียว · ซ้าย = 0 ขวา = 1 · bit เฉลี่ย = Σ(ความยาวรหัส × ความถี่) / Σความถี่ = <b>${avg}</b> bit ต่อตัว` });
     return { fr, nodes, root, codes, avg };
   }
 

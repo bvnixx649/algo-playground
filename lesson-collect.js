@@ -28,13 +28,24 @@
     for (let i = 0; i < n; i++)
       for (let j = 0; j < m; j++) {
         const up = i ? F[i - 1][j] : null, left = j ? F[i][j - 1] : null;
-        const parts = [up != null ? `บน ${K(up, 'skip')}` : null, left != null ? `ซ้าย ${K(left, 'take')}` : null].filter(Boolean);
+        const names = [], vals = [];
+        if (up != null) { names.push(`F(${i},${j + 1})`); vals.push(K(up, 'skip')); }
+        if (left != null) { names.push(`F(${i + 1},${j})`); vals.push(K(left, 'take')); }
+        const formula = names.length ? `max( ${names.join(' , ')} )` : '0';
+        const sub = vals.length ? `max( ${vals.join(' , ')} )` : '0';
         fr.push({ upto: i * m + j, cur: [i, j], up: i ? [i - 1, j] : null, left: j ? [i, j - 1] : null,
-          cap: `F(${i + 1},${j + 1}) = ${parts.length ? `max( ${parts.join(' , ')} )` : '0'} + ${g[i][j]} = <b>${F[i][j]}</b>` });
+          cap: `F(${i + 1},${j + 1}) = ${formula} + c${i + 1}${j + 1} = ${sub} + ${g[i][j]} = <b>${F[i][j]}</b>` });
       }
-    for (let k = path.length - 1; k >= 0; k--) {
-      fr.push({ upto: n * m, path: path.slice(k), cap: k === 0 ? `เส้นทางที่เก็บได้ <b>${F[n - 1][m - 1]} เหรียญ</b>` : `ย้อนทาง: จาก (${path[k][0] + 1},${path[k][1] + 1}) ไปช่องบนหรือซ้ายที่ค่ามากกว่า` });
+    for (let k = path.length - 1; k >= 1; k--) {
+      const [ci, cj] = path[k], [pi, pj] = path[k - 1];
+      const up = ci ? F[ci - 1][cj] : null, left = cj ? F[ci][cj - 1] : null;
+      const fromUp = pi === ci - 1;
+      const cap = up != null && left != null
+        ? `F(${ci + 1},${cj + 1}) มาจาก max( บน F(${ci},${cj + 1}) = ${up} , ซ้าย F(${ci + 1},${cj}) = ${left} ) → ${fromUp ? 'บน' : 'ซ้าย'} มากกว่า ไปช่อง (${pi + 1},${pj + 1})`
+        : `F(${ci + 1},${cj + 1}) มาได้ทางเดียวคือ (${pi + 1},${pj + 1}) เพราะติดขอบกระดาน`;
+      fr.push({ upto: n * m, path: path.slice(k), cap });
     }
+    fr.push({ upto: n * m, path: path.slice(0), cap: `เส้นทางที่เก็บได้ <b>${F[n - 1][m - 1]} เหรียญ</b>` });
     return { F, fr };
   }
 

@@ -38,9 +38,12 @@
     const filled = new Set();
     for (const st of steps) {
       filled.add(st.i + ',' + st.j);
-      const lines = st.cand.map((c) => `root ${keys[c.k - 1]}: ${Lab.fmt(c.a)} + ${Lab.fmt(c.b)} = ${c.k === st.bk ? `<b>${Lab.fmt(c.v)}</b>` : Lab.fmt(c.v)}`).join(' · ');
+      const lines = st.cand.map((c) => {
+        const leftName = `C(${st.i},${c.k - 1})`, rightName = `C(${c.k + 1},${st.j})`;
+        return `k=${keys[c.k - 1]}: ${leftName}+${rightName} = ${Lab.fmt(c.a)}+${Lab.fmt(c.b)} = ${c.k === st.bk ? `<b>${Lab.fmt(c.v)}</b>` : Lab.fmt(c.v)}`;
+      }).join(' · ');
       fr.push({ filled: new Set(filled), cur: [st.i, st.j], srcA: [st.i, st.bk - 1], srcB: [st.bk + 1, st.j],
-        cap: `C(${st.i},${st.j}) ลอง ${lines} → min + Σp(${Lab.fmt(st.sp)}) = <b>${Lab.fmt(st.val)}</b> · root = ${K(keys[st.bk - 1], 'hi')}` });
+        cap: `C(${st.i},${st.j}) = min{ ${lines} } + Σp(${Lab.fmt(st.sp)}) = <b>${Lab.fmt(st.val)}</b> · root = ${K(keys[st.bk - 1], 'hi')}` });
     }
     fr.push({ filled: new Set(filled), done: true, cap: `C(1,${n}) = <b>${Lab.fmt(C[1][n])}</b> = จำนวนครั้งเปรียบเทียบเฉลี่ยของต้นไม้ที่ดีที่สุด · root = ${keys[R[1][n] - 1]}` });
     return { C, R, fr };

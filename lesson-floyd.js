@@ -21,10 +21,10 @@
       for (let i = 0; i < 4; i++)
         for (let j = 0; j < 4; j++) {
           if (warsh) {
-            if (!M[i][j] && M[i][k] && M[k][j]) { N[i][j] = 1; chg.push([i, j, `${V[i]}→${V[k]}→${V[j]}`]); }
+            if (!M[i][j] && M[i][k] && M[k][j]) { N[i][j] = 1; chg.push([i, j, `R[${V[i]},${V[j]}] = R[${V[i]},${V[k]}] and R[${V[k]},${V[j]}] = 1 and 1 = 1 (${V[i]}→${V[k]}→${V[j]})`]); }
           } else {
             const via = M[i][k] + M[k][j];
-            if (via < M[i][j]) { N[i][j] = via; chg.push([i, j, `${V[i]}→${V[j]}: ${Lab.fmt(M[i][k])} + ${Lab.fmt(M[k][j])} = ${via}${M[i][j] === INF ? '' : ` (เดิม ${M[i][j]})`}`]); }
+            if (via < M[i][j]) { N[i][j] = via; chg.push([i, j, `D[${V[i]},${V[j]}] = D[${V[i]},${V[k]}] + D[${V[k]},${V[j]}] = ${Lab.fmt(M[i][k])} + ${Lab.fmt(M[k][j])} = ${via}${M[i][j] === INF ? '' : ` (แทน ${Lab.fmt(M[i][j])})`}`]); }
           }
         }
       M = N;

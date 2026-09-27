@@ -31,9 +31,9 @@
         const nd = dist[u] + w, old = dist[v];
         if (nd < old) {
           dist[v] = nd; prev[v] = u;
-          F.push(snap({ cur: u, edge: [u, v], chg: v, cap: `${u}→${v}: ${dist[u]} + ${w} = ${K(nd, 'hi')} น้อยกว่า ${fmt(old)} → อัปเดต d(${v}) = ${nd}, มาจาก ${u}` }));
+          F.push(snap({ cur: u, edge: [u, v], chg: v, cap: `d(${v}) = d(${u}) + w(${u},${v}) = ${dist[u]} + ${w} = ${K(nd, 'hi')} < ${fmt(old)} → อัปเดต d(${v}) = ${nd}, มาจาก ${u}` }));
         } else {
-          F.push(snap({ cur: u, edge: [u, v], cap: `${u}→${v}: ${dist[u]} + ${w} = ${nd} ไม่น้อยกว่า ${old} → คงค่าเดิม` }));
+          F.push(snap({ cur: u, edge: [u, v], cap: `d(${v}) = d(${u}) + w(${u},${v}) = ${dist[u]} + ${w} = ${nd} ไม่น้อยกว่า d(${v}) เดิม = ${old} → คงค่าเดิม` }));
         }
       }
     }
@@ -116,10 +116,12 @@
     stage.className = 'stage';
     slot.append(stage);
     let target = 'e';
+    const edgeW = (u, v) => { const e = G.E.find(([a, b]) => (a === u && b === v) || (!G.directed && a === v && b === u)); return e ? e[2] : 0; };
     const draw = () => {
       const p = pathTo(f.prev, 'a', target);
+      const ws = p.slice(0, -1).map((u, i) => edgeW(u, p[i + 1]));
       stage.innerHTML = svgGraph(G, f, { path: p, click: true }) +
-        `<div class="cap">เส้นทางไป ${K(target, 'acc')}: <b class="mono">${p.join(' → ')}</b> = <b>${f.dist[target]}</b> <span class="muted">· แตะจุดอื่นเพื่อดูเส้นทาง</span></div>`;
+        `<div class="cap">d(${target}) = ${p.join(' → ')} = ${ws.join(' + ')} = <b>${f.dist[target]}</b> <span class="muted">· แตะจุดอื่นเพื่อดูเส้นทาง</span></div>`;
     };
     stage.addEventListener('click', (e) => { const g = e.target.closest('.nd'); if (!g || g.dataset.v === 'a') return; target = g.dataset.v; draw(); });
     draw();

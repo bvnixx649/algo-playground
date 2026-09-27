@@ -124,7 +124,6 @@ dl.syms dd{margin:0;color:var(--ink-2);font-size:15.5px;line-height:1.5}
 details.symk{margin:2px 0 8px}
 details.symk summary{cursor:pointer;font-size:14px;color:var(--acc);font-weight:600;padding:4px 0;list-style-position:inside}
 details.symk dl.syms{margin-top:8px}
-@media (max-width:440px){dl.syms div{grid-template-columns:1fr;gap:0}dl.syms dt{white-space:normal}}
 .beat.core .rule{background:var(--surface)}
 /* worked solution under steppers */
 .swork{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
@@ -529,6 +528,64 @@ table.kt td.hl-dg{box-shadow:0 0 0 3px var(--take) inset;color:var(--take)}
   .gsvg .sub{font-size:15px}
   .gsvg .bit{font-size:17px}
 }
+/* ================= editorial pass (after samwho / Red Blob / Ciechanowski) =================
+   one reading column, figures on a soft band instead of bordered cards,
+   formulas set large on their own, no boxes inside boxes */
+:root{--bg:#FFFFFF;--band:#F4F5F7}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0E1015;--band:#161920;--surface:#1B1F27}}
+:root[data-theme="dark"]{--bg:#0E1015;--band:#161920;--surface:#1B1F27}
+body{font-size:17.5px;line-height:1.78}
+.col{max-width:680px}
+.top{background:color-mix(in srgb,var(--bg) 88%,transparent)}
+.lhead{padding-block:64px 12px}
+.lhead .chip{font-weight:500;color:var(--ink-3);letter-spacing:0}
+.lhead .chip i{display:none}
+.beat{padding-block:30px}
+.beat h2{font-size:clamp(25px,3.2vw,31px);margin:0 0 12px}
+.beat p{color:var(--ink-2);margin-bottom:16px}
+.beat .kick{display:none}
+/* figures */
+.stage{background:var(--band);background-image:none;border:0;border-radius:22px;padding:26px 26px 20px}
+.stepper{border-top:0;padding-top:6px}
+.cap{font-size:17.5px}
+.swork{border-top:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
+.cells .c,table.kt td{background:var(--surface)}
+table.kt td.empty,.cells .c.empty{background:color-mix(in srgb,var(--surface) 55%,transparent)}
+.board .sq{background:var(--surface)}
+.navb{background:var(--surface)}
+/* core idea: no band, the formula itself is the hero */
+.beat.core{background:none;border:0;border-radius:0;padding:42px 0 30px;margin:0}
+.beat.core h2{font-size:clamp(30px,4.4vw,44px);line-height:1.18;margin-bottom:14px}
+.beat.core p{font-size:18px}
+.rule,.beat.core .rule{background:none;border:0;border-left:3px solid var(--acc);border-radius:0;box-shadow:none;padding:4px 0 4px 22px;margin:22px 0 22px}
+.beat.core .rule{font-size:clamp(18px,2.5vw,22px);line-height:1.85}
+.rule .lbl{font-size:14px}
+dl.syms,.beat.core dl.syms{background:none;border:0;border-radius:0;margin:0 0 20px;padding-left:25px;gap:2px}
+dl.syms div{border:0;padding:3px 0;grid-template-columns:minmax(110px,max-content) 1fr;gap:18px}
+dl.syms dt{font-size:14.5px}
+dl.syms dd{font-size:15.5px}
+details.symk dl.syms{padding-left:0}
+/* questions: no card, a rule above */
+.check{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:22px 0 4px}
+.check .ck{font-family:var(--f-body);letter-spacing:0;font-weight:600;color:var(--ink-3);font-size:13.5px}
+.opt{background:var(--bg)}
+/* side notes: plain list */
+.beat ul.clean{gap:0}
+.beat ul.clean li{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:12px 0}
+.beat ul.clean li:first-child{border-top:0}
+.recap{background:var(--band);color:var(--ink);border-radius:22px}
+.recap h2{color:var(--ink)}
+.recap ol{color:var(--ink-2)}
+.recap .k{background:var(--surface);color:var(--ink)}
+.lab-card{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:22px 0}
+/* practice */
+.pstage{background:var(--band)}
+.ptiles .tile,.tile{background:var(--band);border-color:transparent}
+.ptiles .tile.sel{background:var(--bg);border-color:var(--acc)}
+.herostrip{background:var(--band);border:0}
+.phint{background:var(--band);border:0;border-left:3px solid var(--hi)}
+@media (max-width:560px){.stage{padding:16px 12px 14px;border-radius:18px}.beat.core{padding:30px 0 20px}.rule,.beat.core .rule{padding-left:16px}dl.syms,.beat.core dl.syms{padding-left:0}}
+@media (max-width:440px){dl.syms div{grid-template-columns:minmax(0,38%) 1fr;gap:12px;padding:4px 0}dl.syms dt{white-space:normal;font-size:13.5px}dl.syms dd{font-size:14.5px}}
 </style>
 <div id="app"></div>
 <script src="app.js"></script>
