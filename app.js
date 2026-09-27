@@ -276,11 +276,23 @@
 
   /* helper for lessons: beat section */
   Lab.beat = function (host, { kick, title, html = '', wide = false }) {
+    // Weight by role: the core idea stands out, side material (traps, sandboxes) steps back.
+    const tier = /^(ระวัง|ลองเอง|ลองใช้|ประยุกต์|ทำด้วยมือ)/.test(kick || '') ? 'side'
+      : /^(ไอเดีย|นิยาม|วิธีใช้)/.test(kick || '') || html.includes('class="rule"') ? 'core' : '';
+    const fold = /^ลองเอง/.test(kick || '');
     const s = document.createElement('section');
-    s.className = 'beat';
+    s.className = 'beat ' + tier;
     s.innerHTML = `<div class="col">${kick ? `<div class="kick">${kick}</div>` : ''}${title ? `<h2>${title}</h2>` : ''}${html}</div>`;
     const slot = document.createElement('div');
     slot.className = wide ? 'wide' : 'col';
+    if (fold) {
+      const b = document.createElement('button');
+      b.className = 'btn ghost fold';
+      b.innerHTML = `เปิดดู ${ICON.next}`;
+      b.onclick = () => { slot.hidden = false; b.remove(); };
+      s.firstChild.append(b);
+      slot.hidden = true;
+    }
     s.append(slot);
     host.append(s);
     return slot;

@@ -45,13 +45,18 @@
     host.innerHTML = `<div class="dhead"><h2>${D.title}</h2><p>${D.task}</p></div>
       <div class="stage pstage"></div>
       <div class="phint" aria-live="polite"></div>
-      <div class="pbar"><button class="btn ghost hintb">คำใบ้</button><span class="pprog"></span><span class="sp"></span><button class="btn newb">โจทย์ใหม่</button></div>`;
-    const stage = host.querySelector('.pstage'), hintEl = host.querySelector('.phint'), prog = host.querySelector('.pprog');
+      <div class="pbar"><button class="btn ghost hintb">คำใบ้</button><span class="pprog"></span><span class="sp"></span><button class="btn newb">โจทย์ใหม่</button></div>
+      <ol class="work"></ol>`;
+    const stage = host.querySelector('.pstage'), hintEl = host.querySelector('.phint'), prog = host.querySelector('.pprog'), workEl = host.querySelector('.work');
     let inst = null;
     const ctx = {
       miss: 0,
       root: stage,
       progress(a, b) { prog.textContent = `${a}/${b}`; },
+      work(html) {
+        workEl.querySelectorAll('.new').forEach((x) => x.classList.remove('new'));
+        workEl.insertAdjacentHTML('beforeend', `<li class="new">${html}</li>`);
+      },
       clearHint() { hintEl.classList.remove('on'); stage.querySelectorAll('.hl-up,.hl-dg').forEach((e) => e.classList.remove('hl-up', 'hl-dg')); },
       focusNext(from) {
         const all = [...stage.querySelectorAll('input.ans')].filter((x) => !x.readOnly && x.offsetParent !== null);
@@ -75,6 +80,7 @@
       ctx.clearHint();
       host.querySelector('.hintb').disabled = false;
       stage.innerHTML = '';
+      workEl.innerHTML = '';
       inst = D.create(stage, ctx);
     }
     host.querySelector('.hintb').onclick = () => {
@@ -143,12 +149,18 @@
         </div>`;
       const ins = el.querySelectorAll('.ptable input');
       const tableDone = () => [...ins].every((x) => x.readOnly);
+      const tableEq = (c) => {
+        if (!c) return `t(อื่น ๆ) = m = <b>${m}</b>`;
+        const at = pat.slice(0, -1).lastIndexOf(c);
+        if (at < 0) return `t(${esc(c)}) = m = <b>${m}</b> <span class="muted">(${esc(c)} อยู่แค่ตัวท้าย ไม่นับ)</span>`;
+        return `t(${esc(c)}) = m − 1 − ${at} = ${m} − 1 − ${at} = <b>${m - 1 - at}</b>`;
+      };
       keys.forEach((c, n) => {
         ins[n].dataset.c = c;
-        wire(ins[n], t[c] ?? m, ctx, () => { bump(); if (tableDone()) openRun(); });
+        wire(ins[n], t[c] ?? m, ctx, () => { ctx.work(tableEq(c)); bump(); if (tableDone()) openRun(); });
       });
       ins[keys.length].dataset.c = '';
-      wire(ins[keys.length], m, ctx, () => { bump(); if (tableDone()) openRun(); });
+      wire(ins[keys.length], m, ctx, () => { ctx.work(tableEq('')); bump(); if (tableDone()) openRun(); });
 
       const sh = el.querySelector('.sh'), ask = el.querySelector('.ask'), hist = el.querySelector('.hist');
       function openRun() {
@@ -176,6 +188,9 @@
       }
       function advance() {
         const r = R[round];
+        ctx.work(r.found
+          ? `รอบ ${round + 1}: เทียบจากขวา ตรงครบ ${r.cmp.length} ตัว → เจอที่ index ${r.start} <span class="muted">(เทียบ ${r.cmp.length} ครั้ง)</span>`
+          : `รอบ ${round + 1}: ตัวใต้ท้าย = ${esc(r.c)} → t(${esc(r.c)}) = <b>${r.shift}</b> <span class="muted">(เทียบ ${r.cmp.length} ครั้ง)</span>`);
         bump();
         ask.querySelectorAll('input,button').forEach((x) => (x.disabled = true));
         Lab.horspool.drawStrip(sh, text, pat, { start: r.start, cmp: r.cmp, found: r.found, look: r.found ? null : r.look });
@@ -189,7 +204,7 @@
         ask.innerHTML = `<span>${last.found ? 'เจอแล้ว' : 'pattern เลยท้าย text ไปแล้ว ไม่เจอ'} · รวมทุกรอบเทียบตัวอักษรไปกี่ครั้ง</span>${numInput('w')}<span>ครั้ง</span>`;
         if (!last.found) Lab.horspool.drawStrip(sh, text, pat, { start: last.start, cmp: last.cmp });
         const inp = ask.querySelector('input');
-        wire(inp, comps, ctx, () => { bump(); ctx.finish(`รวม ${comps} ครั้ง ถูกต้อง`); });
+        wire(inp, comps, ctx, () => { ctx.work(`จำนวนการเทียบ = ${R.map((r) => r.cmp.length).join(' + ')} = <b>${comps}</b>`); bump(); ctx.finish(`รวม ${comps} ครั้ง ถูกต้อง`); });
         round = R.length;
       }
 
@@ -256,8 +271,26 @@
       el.querySelectorAll('td.in input').forEach((inp) => {
         const td = inp.parentElement, i = +td.dataset.i, j = +td.dataset.j;
         inp.setAttribute('aria-label', `F(${i},${j})`);
-        wire(inp, F[i][j], ctx, () => { ctx.progress(++solved, total); if (solved === n * W) openPick(); });
+        wire(inp, F[i][j], ctx, () => { ctx.work(ksEq(i, j, true)); ctx.progress(++solved, total); if (solved === n * W) openPick(); });
       });
+      // equation for F(i,j); numbers only for cells already known (row 0, col 0 or solved)
+      const known = (i, j) => i === 0 || j === 0 || !!(cell(i, j).querySelector('input') || {}).readOnly;
+      const val = (i, j) => (known(i, j) ? F[i][j] : '?');
+      function ksEq(i, j, full) {
+        const { w, v } = items[i - 1], res = full ? `<b>${F[i][j]}</b>` : '?';
+        if (w > j) return `F(${i},${j}) = F(${i - 1},${j}) = ${res} <span class="muted">(w${i} = ${w} > ${j} ใส่ไม่ได้)</span>`;
+        const a = val(i - 1, j), b = val(i - 1, j - w);
+        return `F(${i},${j}) = max( F(${i - 1},${j}) , ${v} + F(${i - 1},${j - w}) ) = max( ${a} , ${v} + ${b} )${b !== '?' ? ` = max( ${a} , ${v + b} )` : ''} = ${res}`;
+      }
+      function backEq() {
+        const L = [];
+        let j = W;
+        for (let i = n; i >= 1; i--) {
+          if (F[i][j] === F[i - 1][j]) L.push(`F(${i},${j}) = ${F[i][j]} = F(${i - 1},${j}) → ไม่ใส่ชิ้น ${i}`);
+          else { L.push(`F(${i},${j}) = ${F[i][j]} ≠ F(${i - 1},${j}) = ${F[i - 1][j]} → ใส่ชิ้น ${i}, j = ${j} − ${items[i - 1].w} = ${j - items[i - 1].w}`); j -= items[i - 1].w; }
+        }
+        return L;
+      }
       const pickSet = new Set();
       function openPick() {
         phase = 2;
@@ -276,6 +309,7 @@
         if (ws <= W && vs === F[n][W]) {
           ctx.progress(total, total);
           el.querySelectorAll('.item,.sendb').forEach((x) => (x.disabled = true));
+          backEq().forEach((l) => ctx.work(l));
           ctx.finish(`หยิบชิ้น ${[...pickSet].sort().map((k) => k + 1).join(', ')} หนัก ${ws} ได้ ${vs}`);
         } else {
           ctx.miss++;
@@ -291,9 +325,10 @@
           if (!inp) return '';
           const td = inp.parentElement, i = +td.dataset.i, j = +td.dataset.j, { w, v } = items[i - 1];
           cell(i - 1, j).classList.add('hl-up');
-          if (w > j) return `F(${i},${j}): ชิ้น ${i} หนัก ${w} เกินเป้ที่จุ ${j} ใส่ไม่ได้ ลอก${K('ช่องบน', 'skip')}ลงมาได้เลย`;
+          if (w > j) return `ชิ้น ${i} หนัก ${w} เกินเป้ที่จุ ${j} ใส่ไม่ได้ ลอก${K('ช่องบน', 'skip')}ลงมา<br><span class="mono">${ksEq(i, j, false)}</span>`;
           cell(i - 1, j - w).classList.add('hl-dg');
-          return `F(${i},${j}) = max( ไม่ใส่ = ${K('ช่องบน', 'skip')} , ใส่ = ${v} + ${K(`F(${i - 1},${j - w})`, 'take')} )`;
+          const ready = known(i - 1, j) && known(i - 1, j - w);
+          return `เลือกค่ามากกว่าระหว่างไม่ใส่ (${K('ช่องบน', 'skip')}) กับใส่ (${v} + ${K(`F(${i - 1},${j - w})`, 'take')})<br><span class="mono">${ksEq(i, j, false)}</span>${ready ? '' : '<br><span class="muted">เติมช่องที่ไฮไลต์ก่อน</span>'}`;
         },
       };
     },
@@ -343,10 +378,15 @@
         th.querySelectorAll('input.ans').forEach((inp, k) => {
           const p = pend[k];
           inp.dataset.v = p.v;
-          wire(inp, p.nd, ctx, () => { p.ok = true; if (pend.every((x) => x.ok)) setTimeout(finishRelax, 350); });
+          wire(inp, p.nd, ctx, () => { ctx.work(djEq(p, true)); p.ok = true; if (pend.every((x) => x.ok)) setTimeout(finishRelax, 350); });
         });
         if (phase === 'pick') ask.innerHTML = done.length ? 'แตะจุดที่จะปิดถาวรเป็นลำดับถัดไป' : 'แตะจุดแรกที่จะปิดถาวร';
         else ask.innerHTML = `ปิด ${K(cur, 'acc')} แล้ว กรอก d ใหม่ของ ${pend.map((p) => K(p.v)).join(' ')} ในตาราง`;
+      }
+      function djEq(p, full) {
+        const head = `d(${p.v}) = min(${Lab.fmt(p.old)}, d(${cur})+${p.w}) = min(${Lab.fmt(p.old)}, ${d[cur]}+${p.w})`;
+        if (!full) return `${head} = ?`;
+        return `${head} = <b>${p.nd}</b> <span class="muted">${p.nd < p.old ? `(อัปเดต มาจาก ${cur})` : '(คงเดิม)'}</span>`;
       }
       function candidates() {
         const open = V.filter((v) => !done.includes(v) && d[v] < Infinity);
@@ -361,6 +401,8 @@
         const { best } = candidates();
         if (d[v] !== best) { ctx.miss++; shakeEl(g); g.classList.add('bad'); setTimeout(() => g.classList.remove('bad'), 700); return; }
         ctx.clearHint();
+        const others = V.filter((x) => !done.includes(x) && d[x] < Infinity && x !== v);
+        ctx.work(`ปิด ${v} เพราะ d(${v}) = ${d[v]}${others.length ? ` น้อยสุดเมื่อเทียบกับ ${others.map((x) => `d(${x}) = ${d[x]}`).join(', ')}` : done.length ? ' (เหลือจุดเดียว)' : ' (จุดเริ่มต้น)'}`);
         done.push(v); cur = v;
         ctx.progress(done.length, V.length);
         pend = adj[v].filter(([x]) => !done.includes(x)).map(([x, w]) => ({ v: x, w, old: d[x], nd: Math.min(d[x], d[v] + w) }));
@@ -387,7 +429,7 @@
           const v = act && act.dataset && act.dataset.v && !act.readOnly ? act.dataset.v : (th.querySelector('input.ans:not([readonly])') || {}).dataset?.v;
           const p = pend.find((x) => x.v === v);
           if (!p) return '';
-          return `d(${v}) ใหม่ = min( ค่าเดิม ${Lab.fmt(p.old)} , d(${cur}) + ${p.w} = ${d[cur]} + ${p.w} )`;
+          return `เทียบค่าเดิมกับทางที่ผ่าน ${cur} แล้วเก็บตัวที่น้อยกว่า<br><span class="mono">${djEq(p, false)}</span>`;
         },
       };
     },

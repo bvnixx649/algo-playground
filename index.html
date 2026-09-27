@@ -113,6 +113,19 @@ footer.foot{padding-block:40px 60px;color:var(--ink-3);font-size:14px;border-top
 .beat ul.clean li{padding:12px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--ink-2)}
 .beat ul.clean li b{color:var(--ink)}
 .rule{font-family:var(--f-body);font-weight:500;font-size:clamp(15.5px,2vw,18px);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:4px 0 18px;overflow-x:auto;line-height:1.9}
+/* hierarchy: core idea loud, side material quiet */
+.beat.core{padding-block:44px}
+.beat.core h2{font-size:clamp(30px,4.2vw,42px)}
+.beat.core p{color:var(--ink);font-size:17.5px}
+.beat.core .rule{font-size:clamp(17px,2.3vw,21px);background:color-mix(in srgb,var(--acc) 7%,var(--surface));border:1.5px solid color-mix(in srgb,var(--acc) 38%,var(--line));padding:22px 24px;box-shadow:0 18px 40px -30px color-mix(in srgb,var(--acc) 70%,transparent)}
+.beat.side{padding-block:20px}
+.beat.side .kick{color:var(--ink-3)}
+.beat.side h2{font-size:clamp(20px,2.4vw,23px);color:var(--ink-2);margin-bottom:8px}
+.beat.side p{font-size:15.5px}
+.beat.side ul.clean{gap:0}
+.beat.side ul.clean li{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:10px 2px;font-size:15.5px}
+.beat.side ul.clean li:last-child{border-bottom:0}
+.beat .fold{margin-top:2px}
 .rule .lbl{font-family:var(--f-body);font-size:13.5px;color:var(--ink-3);display:block;line-height:1.4}
 
 .stage{background-color:var(--surface);background-image:radial-gradient(color-mix(in srgb,var(--ink) 9%,transparent) 1px,transparent 1.2px);background-size:20px 20px;background-position:10px 10px;border:1px solid var(--line);border-radius:18px;padding:22px;margin-top:6px}
@@ -439,6 +452,14 @@ table.kt td.hl-dg{box-shadow:0 0 0 3px var(--take) inset;color:var(--take)}
 .phint.on{display:block;animation:fadein .25s var(--ease)}
 @keyframes fadein{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .pbar{display:flex;align-items:center;gap:12px;margin-top:16px}
+.work{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:2px;font-family:var(--f-mono);font-size:14.5px;line-height:1.7;color:var(--ink-2)}
+.work:empty{display:none}
+.work li{padding:6px 12px;border-radius:8px;overflow-wrap:anywhere;transition:background .4s}
+.work li b{color:var(--ink)}
+.work li .muted{color:var(--ink-3);font-family:var(--f-body)}
+.work li.new{background:color-mix(in srgb,var(--acc) 10%,transparent);color:var(--ink);animation:fadein .3s var(--ease)}
+.phint .mono{font-size:15px;overflow-wrap:anywhere}
+.phint .muted{color:var(--ink-3)}
 .pbar .sp{flex:1}
 .pbar .btn{height:50px;padding-inline:24px;font-size:16px}
 .pprog{font-family:var(--f-mono);font-size:14px;color:var(--ink-3)}
