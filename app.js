@@ -48,6 +48,7 @@
          ['greedylab', 'โจทย์ Greedy จาก lab', '12 แบบ จำเกณฑ์การเรียงให้ได้', 'bars']],
   };
   Lab.CH = CH;
+  Lab.CATALOG = CATALOG;
 
   function glyph(kind) {
     const S = (inner, w = 120) => `<svg viewBox="0 0 ${w} 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
@@ -68,6 +69,8 @@
       default: return S('');
     }
   }
+
+  Lab.glyph = glyph;
 
   /* ---------- progress ---------- */
   const progress = {
@@ -176,6 +179,7 @@
   /* ---------- pages ---------- */
   const app = () => document.getElementById('app');
 
+  Lab.topbar = (...a) => topbar(...a);
   function topbar(where, chCls) {
     return `<header class="top ${chCls || ''}"><div class="wrap in">
       <a class="brand" href="#"><span class="dot"></span>Algo Playground</a>
@@ -206,6 +210,7 @@
         <section class="hero">
           <h1>Watch algorithms<br>work, <span class="s1">step</span> <span class="s2">by</span> <span class="s3">step.</span></h1>
           <p class="lead">กดเล่น กดย้อน เปลี่ยนตัวเลขเอง แล้วดูว่าตารางกับกราฟเปลี่ยนยังไง ทุกบทใช้ตัวอย่างเดียวกับสไลด์ในห้อง</p>
+          ${Lab.practice ? `<a class="btn big" href="#practice">ฝึกลงมือทำเอง ${ICON.next}</a>` : ''}
           <div class="herostrip c-st"><div class="scroll"><div id="heroStrip"></div></div></div>
         </section>
         ${chapters}
@@ -262,7 +267,9 @@
   function route() {
     const id = location.hash.slice(1);
     const L = lessons.find((l) => l.id === id);
-    if (L) renderLesson(L); else renderHome();
+    if (L) renderLesson(L);
+    else if (Lab.practice && id.split('/')[0] === 'practice') { current = null; Lab.practice.render(app(), id.split('/')[1]); }
+    else renderHome();
     window.scrollTo(0, 0);
     onScroll();
   }

@@ -396,6 +396,67 @@ table.dt .stt{font-family:var(--f-body);font-weight:500;font-size:13px;color:var
 .lab-card .warn{margin-top:10px;font-size:14px;color:var(--bad);background:var(--bad-bg);border-radius:10px;padding:8px 12px}
 .lab-card .check{border:0;padding:0;margin:0;background:none}
 
+/* ---------- practice ---------- */
+.btn svg{width:18px;height:18px}
+.btn.big{padding:14px 24px;font-size:17px}
+.hero .btn.big{margin-top:28px}
+.btn:disabled{opacity:.4;cursor:default}
+.phero{padding-block:56px 28px}
+.phero h1{font-size:clamp(44px,7vw,76px)}
+.ptiles .tile{min-height:0}
+.ptiles .tile.sel{border-color:var(--acc);box-shadow:0 0 0 1.5px var(--acc) inset}
+.drill{max-width:1000px;margin-inline:auto;padding-top:44px}
+.dhead{max-width:700px}
+.dhead h2{font-size:clamp(28px,3.6vw,38px)}
+.dhead p{color:var(--ink-2);margin:6px 0 14px}
+.pq{font-size:16.5px;color:var(--ink-2);margin:0 0 14px}
+.pq .k{font-size:1em}
+input.ans{width:64px;height:44px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-family:var(--f-mono);font-size:17px;font-weight:600;text-align:center;padding:0;transition:border-color .2s,background .2s,color .2s}
+input.ans:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+input.ans.ok{border-color:var(--ok);background:var(--ok-bg);color:var(--ok);box-shadow:none}
+input.ans.bad{border-color:var(--bad);background:var(--bad-bg);color:var(--bad);animation:shake .32s}
+.shake{animation:shake .32s}
+.ptable .e{align-items:stretch}
+.ptable .e span{display:grid;place-items:center;padding:0 12px}
+.ptable .e input.ans{width:54px;height:42px;border:0;border-left:1.5px solid var(--line);border-radius:0;background:var(--surface)}
+.ptable .e input.ans.ok{background:var(--ok-bg)}
+.ptable .e input.ans.bad{background:var(--bad-bg)}
+.ptable .e:focus-within{border-color:var(--acc)}
+.hs2{margin-top:26px;padding-top:22px;border-top:1px solid var(--line)}
+.hsx{padding-block:4px}
+.ask{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px;font-size:16.5px}
+.ask .or{color:var(--ink-3)}
+.ask .btn{height:44px}
+.hist:empty{display:none}
+table.kt td.in{padding:0;background:transparent}
+table.kt td.in input.ans{width:100%;height:100%;border-radius:9px}
+table.kt td.hl-up{box-shadow:0 0 0 3px var(--skip) inset;color:var(--skip)}
+table.kt td.hl-dg{box-shadow:0 0 0 3px var(--take) inset;color:var(--take)}
+.ks2{margin-top:24px}
+.ks2 .item{font:inherit;color:inherit}
+.dt input.ans{width:62px;height:36px;font-size:16px}
+.phint{display:none;margin-top:16px;font-size:16.5px;line-height:1.65;padding:14px 18px;border-radius:14px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--hi)}
+.phint.on{display:block;animation:fadein .25s var(--ease)}
+@keyframes fadein{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.pbar{display:flex;align-items:center;gap:12px;margin-top:16px}
+.pbar .sp{flex:1}
+.pbar .btn{height:50px;padding-inline:24px;font-size:16px}
+.pprog{font-family:var(--f-mono);font-size:14px;color:var(--ink-3)}
+.pdone{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:22px;padding-top:20px;border-top:1px solid var(--line);animation:fadein .3s var(--ease)}
+.pdone b{display:block;font-family:var(--f-display);font-size:21px;line-height:1.35}
+.pdone span{color:var(--ink-3);font-size:15px}
+.pdone .btn{background:var(--acc);color:var(--surface)}
+@media (max-width:640px){
+  .phero{padding-block:36px 18px}
+  .ptiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .ptiles .tile{padding:12px 10px;gap:6px;align-items:center;text-align:center;border-radius:14px}
+  .ptiles .tile p,.ptiles .tile .st{display:none}
+  .ptiles .tile .gl,.ptiles .tile .gl svg{height:34px}
+  .ptiles .tile h3{font-size:15px}
+  .drill{padding-top:30px}
+}
+@media (max-width:560px){table.kt td.in input.ans{font-size:16px}.pbar .btn{padding-inline:18px}}
+
 @media (pointer:coarse){
   .sbtn{width:46px;height:46px}
   .sbtn svg{width:20px;height:20px}
@@ -444,4 +505,5 @@ table.dt .stt{font-family:var(--f-body);font-weight:500;font-size:13px;color:var
 <script src="lesson-dijkstra.js"></script>
 <script src="lesson-huffman.js"></script>
 <script src="lesson-greedylab.js"></script>
+<script src="practice.js"></script>
 <script>Lab.start();</script>
