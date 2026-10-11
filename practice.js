@@ -11,31 +11,25 @@
   // Checks as you type: right once it equals the answer, wrong once it is as long as the answer (or on Enter/blur).
   function wire(inp, answer, ctx, onRight) {
     const ans = String(answer).toUpperCase();
-    inp.autocomplete = 'off';
-    inp.spellcheck = false;
-    const judge = (final) => {
-      if (inp.readOnly) return;
-      const v = inp.value.trim().toUpperCase();
-      inp.classList.remove('bad');
-      if (!v) return;
-      if (v === ans) {
+    Lab.answerInput(inp, {
+      good: (v) => v.toUpperCase() === ans,
+      ok: () => {
         inp.value = String(answer);
         inp.readOnly = true;
-        inp.classList.add('ok');
+        inp.classList.remove('bad'); inp.classList.add('ok');
         inp.tabIndex = -1;
         ctx.clearHint();
         const had = document.activeElement === inp;
         onRight && onRight();
         if (had) ctx.focusNext(inp);
-      } else if (final || v.length >= ans.length) {
-        void inp.offsetWidth;
-        inp.classList.add('bad');
-        ctx.miss++;
-      }
-    };
-    inp.addEventListener('input', () => judge(false));
-    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { judge(true); e.preventDefault(); } });
-    inp.addEventListener('change', () => judge(true));
+      },
+      bad: (final, v) => {
+        inp.classList.remove('bad');
+        if (!v) return;
+        // wrong once it is as long as the answer, or on Enter/blur
+        if (final || v.length >= ans.length) { void inp.offsetWidth; inp.classList.add('bad'); ctx.miss++; }
+      },
+    });
   }
   const numInput = (cls = '') => `<input class="ans ${cls}" inputmode="numeric" enterkeyhint="next" aria-label="คำตอบ">`;
   function shakeEl(el) { el.classList.remove('shake'); void el.getBoundingClientRect(); el.classList.add('shake'); }
@@ -98,9 +92,8 @@
   /* ================= Horspool ================= */
   const WORDS = ['BARBER', 'LEADER', 'PEPPER', 'BANANA', 'TATTOO', 'GREEDY', 'COCOA', 'EERIE', 'KAYAK', 'BAOBAB', 'SEESAW', 'ROTOR', 'NINJA', 'MAMBA'];
 
-  function hsTable(p) { const t = {}; for (let j = 0; j < p.length - 1; j++) t[p[j]] = p.length - 1 - j; return t; }
   function hsRounds(text, pat) {
-    const m = pat.length, n = text.length, t = hsTable(pat), R = [];
+    const m = pat.length, n = text.length, t = Lab.shiftTable(pat), R = [];
     let i = m - 1;
     while (i <= n - 1) {
       const start = i - m + 1, cmp = [];
@@ -132,7 +125,7 @@
     blurb: 'สร้างตาราง shift แล้วบอกว่าแต่ละรอบกระโดดกี่ช่อง',
     task: 'เติมตาราง shift ก่อน จากนั้นดูตัวอักษรใน text ที่อยู่ใต้ตัวท้ายของ pattern แล้วตอบว่าต้องเลื่อนกี่ช่อง',
     create(el, ctx) {
-      const { text, pat, R } = hsProblem(), m = pat.length, t = hsTable(pat);
+      const { text, pat, R } = hsProblem(), m = pat.length, t = Lab.shiftTable(pat);
       const keys = [...new Set(pat)];
       const total = keys.length + 1 + R.length + 1;
       let solved = 0, round = 0, stage2 = false;
@@ -229,20 +222,12 @@
   });
 
   /* ================= 0/1 Knapsack ================= */
-  function ksSolve(items, W) {
-    const n = items.length, F = Array.from({ length: n + 1 }, () => Array(W + 1).fill(0));
-    for (let i = 1; i <= n; i++) for (let j = 1; j <= W; j++) {
-      const { w, v } = items[i - 1];
-      F[i][j] = w <= j ? Math.max(F[i - 1][j], v + F[i - 1][j - w]) : F[i - 1][j];
-    }
-    return F;
-  }
   function ksProblem() {
     for (let tries = 0; tries < 400; tries++) {
       const n = rnd(3, 4), W = n === 3 ? rnd(4, 5) : rnd(5, 6);
       const items = Array.from({ length: n }, () => ({ w: rnd(1, 4), v: rnd(3, 30) }));
       if (items.reduce((s, x) => s + x.w, 0) <= W) continue;
-      const F = ksSolve(items, W);
+      const F = Lab.core.knapsack.solve(items, W).F;
       let j = W, used = 0;
       for (let i = n; i >= 1; i--) if (F[i][j] !== F[i - 1][j]) { used++; j -= items[i - 1].w; }
       if (used >= 2) return { items, W, F };

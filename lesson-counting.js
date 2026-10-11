@@ -134,4 +134,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.counting = { cmpFrames, distFrames };
 })();

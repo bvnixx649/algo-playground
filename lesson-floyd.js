@@ -118,4 +118,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.floyd = { frames };
 })();

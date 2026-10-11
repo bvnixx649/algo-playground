@@ -225,4 +225,6 @@
         <li>เวลาและ memory ${Lab.k('Θ(nW)')}</li></ol></div>`;
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.knapsack = { solve };
 })();

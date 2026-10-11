@@ -1,11 +1,14 @@
+<!doctype html>
+<html lang="th">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F4F5F8">
+<meta name="theme-color" content="#FFFFFF">
 <title>Algo Playground</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap">
 <style>
 :root{
-  --bg:#F4F5F8; --surface:#FFFFFF; --surface-2:#ECEEF3; --ink:#12151C; --ink-2:#434B5C; --ink-3:#848DA0; --line:#DFE3EA;
+  --bg:#FFFFFF; --band:#F4F5F7; --surface:#FFFFFF; --surface-2:#ECEEF3; --ink:#12151C; --ink-2:#434B5C; --ink-3:#848DA0; --line:#DFE3EA;
   --st:#0C9A83; --dp:#4A52E0; --gr:#E8641B;
   --hi:#FFD23F; --hi-ink:#3A2C00;
   --ok:#0F9F60; --ok-bg:#E2F5EB; --bad:#E0464B; --bad-bg:#FCE7E7;
@@ -19,14 +22,14 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
-    --bg:#0D0F14; --surface:#161920; --surface-2:#20242E; --ink:#EEF1F6; --ink-2:#B4BBCB; --ink-3:#7C8598; --line:#2A2F3B;
+    --bg:#0E1015; --band:#161920; --surface:#1B1F27; --surface-2:#20242E; --ink:#EEF1F6; --ink-2:#B4BBCB; --ink-3:#7C8598; --line:#2A2F3B;
     --st:#2BC3A6; --dp:#7C84FF; --gr:#FF8A47; --hi:#FFD23F; --hi-ink:#2A2000;
     --ok:#3DD68C; --ok-bg:#12301F; --bad:#FF6B6F; --bad-bg:#3A1719; --skip:#5AA9FF; --take:#FFAA33;
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#0D0F14; --surface:#161920; --surface-2:#20242E; --ink:#EEF1F6; --ink-2:#B4BBCB; --ink-3:#7C8598; --line:#2A2F3B;
+  --bg:#0E1015; --band:#161920; --surface:#1B1F27; --surface-2:#20242E; --ink:#EEF1F6; --ink-2:#B4BBCB; --ink-3:#7C8598; --line:#2A2F3B;
   --st:#2BC3A6; --dp:#7C84FF; --gr:#FF8A47; --hi:#FFD23F; --hi-ink:#2A2000;
   --ok:#3DD68C; --ok-bg:#12301F; --bad:#FF6B6F; --bad-bg:#3A1719; --skip:#5AA9FF; --take:#FFAA33;
 }
@@ -105,7 +108,6 @@ footer.foot{padding-block:40px 60px;color:var(--ink-3);font-size:14px;border-top
 .lhead .sub{font-family:var(--f-display);font-size:clamp(20px,2.6vw,26px);color:var(--ink-2);margin-top:8px;font-weight:500;line-height:1.35}
 .lhead .meta{margin-top:18px;color:var(--ink-3);font-size:14px;display:flex;gap:18px;flex-wrap:wrap}
 .beat{padding-block:34px}
-.beat .kick{font-family:var(--f-mono);font-size:13px;font-weight:700;color:var(--acc);letter-spacing:.04em}
 .beat h2{font-size:clamp(26px,3.4vw,34px);line-height:1.25;margin:6px 0 14px}
 .beat p{margin:0 0 14px;color:var(--ink-2)}
 .beat p b{color:var(--ink)}
@@ -140,7 +142,6 @@ details.symk dl.syms{margin-top:8px}
 .beat.core p{color:var(--ink);font-size:17.5px}
 .beat.core .rule{font-size:clamp(17px,2.3vw,21px);background:color-mix(in srgb,var(--acc) 7%,var(--surface));border:1.5px solid color-mix(in srgb,var(--acc) 38%,var(--line));padding:22px 24px;box-shadow:0 18px 40px -30px color-mix(in srgb,var(--acc) 70%,transparent)}
 .beat.side{padding-block:20px}
-.beat.side .kick{color:var(--ink-3)}
 .beat.side h2{font-size:clamp(20px,2.4vw,23px);color:var(--ink-2);margin-bottom:8px}
 .beat.side p{font-size:15.5px}
 .beat.side ul.clean{gap:0}
@@ -149,7 +150,7 @@ details.symk dl.syms{margin-top:8px}
 .beat .fold{margin-top:2px}
 .rule .lbl{font-family:var(--f-body);font-size:13.5px;color:var(--ink-3);display:block;line-height:1.4}
 
-.stage{background-color:var(--surface);background-image:radial-gradient(color-mix(in srgb,var(--ink) 9%,transparent) 1px,transparent 1.2px);background-size:20px 20px;background-position:10px 10px;border:1px solid var(--line);border-radius:18px;padding:22px;margin-top:6px}
+.stage{background:var(--band);border-radius:22px;padding:26px 26px 20px;margin-top:6px}
 .scroll{overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;max-width:100%}
 .cap{font-size:17px;line-height:1.6;min-height:3.3em;padding:16px 2px 4px;color:var(--ink)}
 .cap .muted{color:var(--ink-3)}
@@ -449,6 +450,8 @@ input.ans{width:64px;height:44px;border:1.5px solid var(--line);border-radius:10
 input.ans:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
 input.ans.ok{border-color:var(--ok);background:var(--ok-bg);color:var(--ok);box-shadow:none}
 input.ans.bad{border-color:var(--bad);background:var(--bad-bg);color:var(--bad);animation:shake .32s}
+.check input.ans.free{width:min(100%,460px);text-align:left;padding:0 12px;font-weight:500}
+table.dt td.t{font-family:var(--f-body);font-weight:500;font-size:14.5px;line-height:1.6}
 .shake{animation:shake .32s}
 .ptable .e{align-items:stretch}
 .ptable .e span{display:grid;place-items:center;padding:0 12px}
@@ -506,7 +509,7 @@ table.kt td.hl-dg{box-shadow:0 0 0 3px var(--take) inset;color:var(--take)}
   .scrub{height:28px}
 }
 @media (max-width:560px){
-  .stage{padding:14px}.check{padding:16px}
+  .check{padding:16px}
   table.kt td{width:40px;height:38px;font-size:15px}
   table.kt th.rowh small{display:none}
   .beat{padding-block:26px}
@@ -530,10 +533,9 @@ table.kt td.hl-dg{box-shadow:0 0 0 3px var(--take) inset;color:var(--take)}
 }
 /* ================= editorial pass (after samwho / Red Blob / Ciechanowski) =================
    one reading column, figures on a soft band instead of bordered cards,
-   formulas set large on their own, no boxes inside boxes */
-:root{--bg:#FFFFFF;--band:#F4F5F7}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0E1015;--band:#161920;--surface:#1B1F27}}
-:root[data-theme="dark"]{--bg:#0E1015;--band:#161920;--surface:#1B1F27}
+   formulas set large on their own, no boxes inside boxes.
+   NOTE: this block deliberately re-declares ~36 selectors from the base CSS above.
+   Same specificity, so the later rule wins — change the value HERE, not above. */
 body{font-size:17.5px;line-height:1.78}
 .col{max-width:680px}
 .top{background:color-mix(in srgb,var(--bg) 88%,transparent)}
@@ -543,9 +545,7 @@ body{font-size:17.5px;line-height:1.78}
 .beat{padding-block:30px}
 .beat h2{font-size:clamp(25px,3.2vw,31px);margin:0 0 12px}
 .beat p{color:var(--ink-2);margin-bottom:16px}
-.beat .kick{display:none}
 /* figures */
-.stage{background:var(--band);background-image:none;border:0;border-radius:22px;padding:26px 26px 20px}
 .stepper{border-top:0;padding-top:6px}
 .cap{font-size:17.5px}
 .swork{border-top:1px solid color-mix(in srgb,var(--ink) 8%,transparent)}
@@ -587,6 +587,8 @@ details.symk dl.syms{padding-left:0}
 @media (max-width:560px){.stage{padding:16px 12px 14px;border-radius:18px}.beat.core{padding:30px 0 20px}.rule,.beat.core .rule{padding-left:16px}dl.syms,.beat.core dl.syms{padding-left:0}}
 @media (max-width:440px){dl.syms div{grid-template-columns:minmax(0,38%) 1fr;gap:12px;padding:4px 0}dl.syms dt{white-space:normal;font-size:13.5px}dl.syms dd{font-size:14.5px}}
 </style>
+</head>
+<body>
 <div id="app"></div>
 <script src="app.js"></script>
 <script src="lesson-counting.js"></script>
@@ -606,4 +608,8 @@ details.symk dl.syms{padding-left:0}
 <script src="lesson-huffman.js"></script>
 <script src="lesson-greedylab.js"></script>
 <script src="practice.js"></script>
+<script src="exam.js"></script>
+<script src="np.js"></script>
 <script>Lab.start();</script>
+</body>
+</html>

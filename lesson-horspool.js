@@ -86,7 +86,7 @@
     stage.className = 'stage';
     slot.append(stage);
     const bf = brute(text, pat);
-    const st = Lab.stepper(stage, {
+    Lab.stepper(stage, {
       frames: frames(text, pat),
       speed: 1100,
       render(el, f, i, all) {
@@ -109,7 +109,6 @@
         return f.cap;
       },
     });
-    return { stage, st };
   }
 
   function builder(slot) {
@@ -140,6 +139,8 @@
   }
 
   Lab.horspool = { frames, drawStrip };
+  Lab.shiftTable = shiftTable;
+  Lab.core = Lab.core || {}; Lab.core.horspool = { frames };
 
   Lab.register({
     id: 'horspool', ch: 'st', title: 'Horspool', sub: 'หา pattern ในข้อความ โดยไม่ต้องเลื่อนทีละช่อง', minutes: 8, checks: 5, slide: 'week7 หน้า 13–22',
@@ -213,11 +214,10 @@
       s = Lab.beat(root, { kick: 'ข้อสอบจำลอง', title: 'แบบที่ออกบ่อย' });
       Lab.check(s, { lesson: L, key: 'c3', label: 'ข้อ 1', q: 'Horspool ใช้ตัวอักษรตัวไหนเปิดตาราง shift', options: ['ตัวใน text ที่เทียบแล้วไม่ตรง', 'ตัวใน text ที่อยู่ใต้ตัวท้ายของ pattern', 'ตัวแรกของ pattern', 'ตัวท้ายของ pattern'], answer: 1,
         why: 'ดูตัวใต้ตัวท้ายเสมอ ไม่ว่าจะเทียบตรงมาแล้วกี่ตัว' });
-      const gap = () => { const d = document.createElement('div'); d.style.height = '14px'; s.append(d); };
-      gap();
+      Lab.gap(s);
       Lab.check(s, { lesson: L, key: 'c4', label: 'ข้อ 2', q: 'Worst case ของ Horspool (text ยาว n, pattern ยาว m)', options: ['Θ(n)', 'Θ(m)', 'Θ(nm)', 'Θ(n log m)'], answer: 2,
         why: 'เช่น text = 000…0 กับ pattern = 1000 ตรง m−1 ตัวทุกครั้งแล้วเลื่อนแค่ 1 ช่อง' });
-      gap();
+      Lab.gap(s);
       Lab.check(s, { lesson: L, key: 'c5', label: 'ข้อ 3', q: `หา ${K('TATACA')} ใน ${K('GCATCGCAGAGAGTATACAGTACG')} ด้วย Horspool เจอที่ index ไหน`, options: ['11', '13', '15', '17'], answer: 1,
         why: 'ตาราง T=3, A=2, C=1, อื่น ๆ=6 · กระโดด 6 → 2 → 3 → 2 แล้วตรงครบที่ index 13 (ลองใส่ในช่อง "ลองเอง" ด้านบนได้)' });
 

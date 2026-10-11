@@ -16,7 +16,6 @@
   Lab.k = (s, cls = '') => `<span class="k ${cls}">${esc(s)}</span>`;
 
   const ICON = {
-    reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
     prev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
     next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
     play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>',
@@ -156,7 +155,6 @@
       count.textContent = `${i + 1}/${frames.length}`;
       prevBtn.disabled = i === 0;
       nextBtn.disabled = i === frames.length - 1;
-      if (opts.onStep) opts.onStep(i, frames);
       drawWork();
     }
     function go(n) { i = Math.max(0, Math.min(frames.length - 1, n)); draw(); }
@@ -164,14 +162,15 @@
     function play() {
       if (i >= frames.length - 1) go(0);
       playBtn.innerHTML = ICON.pause; playBtn.setAttribute('aria-label', 'หยุด');
-      timer = setInterval(() => { if (i >= frames.length - 1) stop(); else go(i + 1); }, speed);
+      // stop the clock if the figure gets replaced (rebuild) while it is playing
+      timer = setInterval(() => { if (!document.body.contains(stage) || i >= frames.length - 1) stop(); else go(i + 1); }, speed);
     }
     bar.addEventListener('click', (e) => {
       const b = e.target.closest('button'); if (!b) return;
       const a = b.dataset.a;
       if (a === 'play') { timer ? stop() : play(); return; }
       stop();
-      if (a === 'next') go(i + 1); else if (a === 'prev') go(i - 1); else if (a === 'reset') go(0);
+      if (a === 'next') go(i + 1); else if (a === 'prev') go(i - 1);
     });
     scrub.addEventListener('input', () => { stop(); go(+scrub.value); });
     host.addEventListener('keydown', (e) => {
@@ -180,11 +179,35 @@
       if (e.key === 'ArrowLeft') { stop(); go(i - 1); e.preventDefault(); }
     });
     draw();
-    return {
-      setFrames(f) { stop(); frames = f; i = 0; draw(); },
-      go, stop,
-      get index() { return i; },
+  };
+
+  // Wire one answer input: checks as you type and re-checks on Enter/blur.
+  // good(value) -> is it right · ok() -> caller locks/reveals · bad(final, value) -> caller shows feedback.
+  // Returns the check function so a "ตรวจ" button can force a final check.
+  Lab.answerInput = function (inp, { good, ok, bad }) {
+    inp.autocomplete = 'off'; inp.spellcheck = false;
+    const judge = (final) => {
+      if (inp.readOnly) return;
+      const v = inp.value.trim();
+      if (good(v)) ok(); else bad(final, v);
     };
+    inp.addEventListener('input', () => judge(false));
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { judge(true); e.preventDefault(); } });
+    inp.addEventListener('change', () => judge(true));
+    return judge;
+  };
+
+  // Page score line: counts marked keys for a lesson, refreshing on any click/typing inside `host`.
+  // `host` must be an element that is recreated with the page (never the persistent #app),
+  // otherwise every re-render would stack another set of listeners.
+  Lab.scoreboard = function ({ host, score, lesson, keys }) {
+    const counted = new Set(keys);
+    const refresh = () => { if (score) score.textContent = Lab.progress.get(lesson).filter((k) => counted.has(k)).length; };
+    host.addEventListener('click', refresh);
+    host.addEventListener('change', refresh);
+    host.addEventListener('input', refresh);
+    refresh();
+    return refresh;
   };
 
   // Multiple-choice check with instant feedback
@@ -252,6 +275,8 @@
           <h1>Watch algorithms<br>work, <span class="s1">step</span> <span class="s2">by</span> <span class="s3">step.</span></h1>
           <p class="lead">กดเล่น กดย้อน เปลี่ยนตัวเลขเอง แล้วดูว่าตารางกับกราฟเปลี่ยนยังไง ทุกบทใช้ตัวอย่างเดียวกับสไลด์ในห้อง</p>
           ${Lab.practice ? `<a class="btn big" href="#practice">ฝึกลงมือทำเอง ${ICON.next}</a>` : ''}
+          ${Lab.examPage ? `<a class="btn ghost big" href="#exam">ข้อสอบเก่า 25 ข้อ ${ICON.next}</a>` : ''}
+          ${Lab.npPage ? `<a class="btn ghost big" href="#np">ใบงาน P · NP · NP-Complete ${ICON.next}</a>` : ''}
           <div class="herostrip c-st"><div class="scroll"><div id="heroStrip"></div></div></div>
         </section>
         ${chapters}
@@ -318,6 +343,8 @@
     const L = lessons.find((l) => l.id === id);
     if (L) renderLesson(L);
     else if (Lab.practice && id.split('/')[0] === 'practice') { current = null; Lab.practice.render(app(), id.split('/')[1]); }
+    else if (Lab.examPage && id.split('/')[0] === 'exam') { current = null; Lab.examPage.render(app()); }
+    else if (Lab.npPage && id.split('/')[0] === 'np') { current = null; Lab.npPage.render(app()); }
     else renderHome();
     window.scrollTo(0, 0);
     onScroll();
@@ -332,9 +359,8 @@
     const s = document.createElement('section');
     s.className = 'beat ' + tier;
     // no eyebrows: the role shows through weight, not labels
-    const kk = '';
     if (kick === 'ข้อสอบจำลอง') title = 'ข้อสอบจำลอง';
-    s.innerHTML = `<div class="col">${kk ? `<div class="kick">${kk}</div>` : ''}${title ? `<h2>${title}</h2>` : ''}${html}</div>`;
+    s.innerHTML = `<div class="col">${title ? `<h2>${title}</h2>` : ''}${html}</div>`;
     const slot = document.createElement('div');
     slot.className = wide ? 'wide' : 'col';
     if (fold) {
@@ -362,6 +388,7 @@
     s.innerHTML = `<div class="recap"><h2>สรุป${items.length === 3 ? ' 3 บรรทัด' : ''}</h2><ol>${items.map((i) => `<li>${i}</li>`).join('')}</ol></div>`;
   };
   Lab.fmt = (x) => (x === Infinity ? '∞' : typeof x === 'number' && !Number.isInteger(x) ? String(+x.toFixed(2)) : String(x));
+  Lab.r2 = (x) => Math.round(x * 100) / 100;
 
   // rows of cells: rows = [{label, cells:[{v, cls}], idx:bool}]
   Lab.cellRows = function (rows) {
@@ -383,7 +410,7 @@
       if (G.directed) { ex = x2 - ((x2 - x1) / L) * 26; ey = y2 - ((y2 - y1) / L) * 26; }
       s += `<line class="${cls}" x1="${x1}" y1="${y1}" x2="${ex}" y2="${ey}"${G.directed ? ` marker-end="url(#${id}m)"` : ''}/>`;
       if (wt != null && !o.noW) {
-        const nx = -(y2 - y1) / L, ny = (x2 - x1) / L, off = o.wOff || 14, t = o.wPos ? o.wPos(u, v) : 0.5;
+        const nx = -(y2 - y1) / L, ny = (x2 - x1) / L, off = 14, t = o.wPos ? o.wPos(u, v) : 0.5;
         s += `<text class="wl" x="${x1 + (x2 - x1) * t + nx * off}" y="${y1 + (y2 - y1) * t + ny * off + 5}">${wt}</text>`;
       }
     }
@@ -408,7 +435,7 @@
     const order = [], depth = {};
     (function walk(n, d) { if (n == null) return; walk(nodes[n].l, d + 1); order.push(n); depth[n] = d; walk(nodes[n].r, d + 1); })(root, 0);
     const maxD = Math.max(...Object.values(depth));
-    const w = o.w || Math.max(260, order.length * (o.gapX || 64) + 40), lh = o.levelH || 70, h = (maxD + 1) * lh + 30 + (o.extraH || 0);
+    const w = o.w || Math.max(260, order.length * (o.gapX || 64) + 40), lh = o.levelH || 70, h = (maxD + 1) * lh + 30;
     const X = {}, Y = {};
     order.forEach((n, i) => { X[n] = 20 + (w - 40) * (order.length === 1 ? 0.5 : i / (order.length - 1)); Y[n] = 30 + depth[n] * lh; });
     let s = `<svg class="gsvg" viewBox="0 0 ${w} ${h}"${o.maxw ? ` style="max-width:${o.maxw}px"` : ''} role="img" aria-label="ต้นไม้">`;

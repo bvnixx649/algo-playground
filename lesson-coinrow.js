@@ -122,4 +122,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.coinrow = { solve };
 })();

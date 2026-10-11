@@ -140,4 +140,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.hashing = { frames };
 })();

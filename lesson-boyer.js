@@ -3,7 +3,6 @@
   const { esc } = Lab;
   const K = Lab.k;
 
-  function t1Table(p) { const m = p.length, t = {}; for (let j = 0; j < m - 1; j++) t[p[j]] = m - 1 - j; return t; }
   function goodSuffix(p) {
     const m = p.length, d2 = {};
     for (let k = 1; k < m; k++) {
@@ -21,7 +20,7 @@
   }
 
   function frames(text, pat) {
-    const m = pat.length, n = text.length, t1 = t1Table(pat), d2 = goodSuffix(pat), F = [];
+    const m = pat.length, n = text.length, t1 = Lab.shiftTable(pat), d2 = goodSuffix(pat), F = [];
     if (!m || m > n) return [{ start: 0, cmp: [], comps: 0, cap: 'pattern ต้องสั้นกว่าหรือยาวเท่ากับ text' }];
     let i = m - 1, comps = 0;
     F.push({ start: 0, cmp: [], comps, cap: 'เทียบจากตัวท้ายของ pattern ไปทางซ้าย เหมือน Horspool' });
@@ -49,7 +48,7 @@
   }
 
   function t1Chips(p, active) {
-    const t = t1Table(p), seen = [];
+    const t = Lab.shiftTable(p), seen = [];
     for (const c of p.slice(0, -1)) if (!seen.includes(c)) seen.push(c);
     const e = (c, v, on) => `<div class="e ${on ? 'on' : ''}"><span>${esc(c)}</span><span>${v}</span></div>`;
     return seen.map((c) => e(c, t[c], active === c)).join('') + e('อื่น ๆ', p.length, active === null);
@@ -157,4 +156,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.boyer = { frames, goodSuffix };
 })();

@@ -1,7 +1,7 @@
 /* Lesson: Optimal Binary Search Tree */
 (function () {
   const K = Lab.k;
-  const r2 = (x) => Math.round(x * 100) / 100;
+  const r2 = Lab.r2;
 
   const TREES = [
     { n: { A: { label: 'A', r: 'B' }, B: { label: 'B', r: 'C' }, C: { label: 'C' } }, root: 'A', d: { A: 1, B: 2, C: 3 } },
@@ -148,4 +148,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.obst = { solve };
 })();

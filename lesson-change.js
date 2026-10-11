@@ -127,4 +127,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.change = { solve, greedy };
 })();

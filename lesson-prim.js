@@ -123,4 +123,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.prim = { frames };
 })();

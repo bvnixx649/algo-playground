@@ -2,7 +2,7 @@
 (function () {
   const K = Lab.k;
   const INF = Infinity;
-  const fmt = (d) => (d === INF ? '∞' : String(d));
+  const fmt = Lab.fmt;
 
   const G = {
     pos: { a: [50, 205], b: [170, 85], c: [400, 85], d: [290, 205], e: [510, 205] },
@@ -93,7 +93,7 @@
     const stage = document.createElement('div');
     stage.className = 'stage';
     slot.append(stage);
-    return Lab.stepper(stage, {
+    Lab.stepper(stage, {
       frames: run(G, s),
       speed: 1300,
       render(el, f) {
@@ -164,8 +164,7 @@
       pre.className = 'stage';
       pre.innerHTML = svgGraph(G, {}, {});
       s.append(pre);
-      const gap = (el) => { const d = document.createElement('div'); d.style.height = '14px'; el.append(d); };
-      gap(s);
+      Lab.gap(s);
       Lab.check(s, { lesson: L, key: 'c1', label: 'ทายก่อน', q: 'ระยะสั้นสุดจาก a ไป e', options: ['9', '10', '11', '13'], answer: 0,
         why: 'a → b → d → e = 3 + 2 + 4 = 9 · ไปตรง a → d → e ได้ 11 · a → b → c → e ได้ 13' });
 
@@ -221,7 +220,7 @@
       s = Lab.beat(root, { kick: 'ข้อสอบจำลอง', title: 'แบบที่ออกบ่อย' });
       Lab.check(s, { lesson: L, key: 'c3', label: 'ข้อ 1', q: 'Dijkstra ที่ใช้ adjacency list + min-heap มีเวลาเท่าไร', options: ['Θ(|V|²)', 'O(|E| log |V|)', 'O(|V| + |E|)', 'Θ(|V|³)'], answer: 1,
         why: 'ดึง min |V| ครั้ง และลดค่าใน heap ไม่เกิน |E| ครั้ง ครั้งละ O(log |V|) · ถ้าใช้ matrix + array ธรรมดาจะเป็น Θ(|V|²)' });
-      gap(s);
+      Lab.gap(s);
       Lab.check(s, { lesson: L, key: 'c4', label: 'ข้อ 2', q: 'ถ้าต้องการระยะสั้นสุด<b>ทุกคู่</b> ควรใช้อะไร', options: ['Dijkstra ครั้งเดียว', 'Prim', 'Floyd (หรือ Dijkstra |V| รอบ)', 'Kruskal'], answer: 2,
         why: 'Dijkstra ให้คำตอบจากจุดเริ่มจุดเดียว · Floyd เป็น DP ได้ทุกคู่ใน Θ(n³) · Prim และ Kruskal หา MST ไม่ใช่ระยะสั้นสุด' });
 
@@ -232,4 +231,6 @@
         <li>น้ำหนักต้องไม่ติดลบ · ${Lab.k('O(|E| log |V|)')} ด้วย heap</li></ol></div>`;
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.dijkstra = { run };
 })();

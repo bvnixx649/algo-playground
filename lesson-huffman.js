@@ -1,7 +1,7 @@
 /* Lesson: Huffman trees and codes */
 (function () {
   const K = Lab.k;
-  const r2 = (x) => Math.round(x * 100) / 100;
+  const r2 = Lab.r2;
 
   function build(freqs) {
     let cnt = 0;
@@ -140,4 +140,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.huffman = { build };
 })();

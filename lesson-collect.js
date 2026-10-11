@@ -109,4 +109,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.collect = { solve };
 })();

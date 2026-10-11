@@ -90,4 +90,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.kruskal = { frames };
 })();

@@ -171,4 +171,6 @@
       ]);
     },
   });
+
+  Lab.core = Lab.core || {}; Lab.core.btree = { initial, insert, height };
 })();
